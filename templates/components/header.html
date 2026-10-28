@@ -1,0 +1,21 @@
+<div class="topbar">
+  <div class="container">
+    <span>Free demo delivery on every order</span>
+    <span>Academic prototype · No real payments</span>
+  </div>
+</div>
+<header class="site-header">
+  <div class="container header-main">
+    <a class="logo" href="/" aria-label="ABC Electronics home">
+      <span class="logo-mark">ABC</span>
+      <span class="logo-copy">Electronics<small>Technology for everyday life</small></span>
+    </a>
+    {% include 'components/search_bar.html' %}
+    <nav class="header-actions" aria-label="Account navigation">
+      <a href="/orders" class="header-action"><span>Orders</span></a>
+      <a href="/cart" class="header-action cart-link"><span>Cart</span><b id="cart-count" aria-label="Items added this visit">0</b></a>
+    </nav>
+  </div>
+  {% include 'components/category_nav.html' %}
+</header>
+

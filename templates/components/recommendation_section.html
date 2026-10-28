@@ -1,0 +1,9 @@
+{% if recommendations %}
+<section class="section">
+  <div class="section-heading">
+    <div><span class="eyebrow">PICKED FOR YOU</span><h2>Recommended products</h2></div>
+    <span class="muted">Based on product and interaction signals</span>
+  </div>
+  <div class="product-grid">{% for product in recommendations %}{% include 'components/product_card.html' %}{% endfor %}</div>
+</section>
+{% endif %}

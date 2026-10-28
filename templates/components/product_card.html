@@ -1,0 +1,23 @@
+<article class="product-card">
+  <a href="/products/{{ product.productId }}" class="product-image">
+    <span class="product-badge">{{ product.category.categoryName }}</span>
+    <img src="/media/product-{{ product.productId }}.png" alt="{{ product.productName }}" width="640" height="480" loading="lazy">
+  </a>
+  <div class="product-card-body">
+    <span class="product-brand">{{ product.brand }}</span>
+    <h3><a href="/products/{{ product.productId }}">{{ product.productName }}</a></h3>
+    <p class="card-description">{{ product.description }}</p>
+    <div class="product-meta">
+      <p class="price">{{ product.price|money }}</p>
+      <span class="stock {{ 'unavailable' if not product.isAvailable(1) or product.status != 'ACTIVE' }}">{{ 'In stock' if product.isAvailable(1) and product.status == 'ACTIVE' else 'Unavailable' }}</span>
+    </div>
+    <div class="product-actions">
+      <a class="details-link" href="/products/{{ product.productId }}">Details</a>
+      <form action="/cart/items" method="post" class="add-cart">
+        <input type="hidden" name="productId" value="{{ product.productId }}">
+        <input type="hidden" name="quantity" value="1">
+        <button class="button compact" {% if not product.isAvailable(1) or product.status != 'ACTIVE' %}disabled{% endif %}>Add to cart</button>
+      </form>
+    </div>
+  </div>
+</article>

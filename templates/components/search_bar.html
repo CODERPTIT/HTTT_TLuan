@@ -1,0 +1,15 @@
+<div class="search-tools">
+<form action="/search" class="search-form" role="search">
+  <label class="sr-only" for="global-search">Search electronics</label>
+  <input id="global-search" name="q" placeholder="Search phones, laptops, TVs and more" value="{{ q|default('') }}" maxlength="500" required>
+  <button aria-label="Search" type="submit"><span aria-hidden="true">⌕</span></button>
+</form>
+<button type="button" class="search-mode" id="image-open" aria-label="Search by image" title="Search by image"><span aria-hidden="true">▧</span><small>Image</small></button>
+<button type="button" class="search-mode" id="voice-open" aria-label="Search by voice" title="Search by voice"><span aria-hidden="true">◉</span><small>Voice</small></button>
+</div>
+<dialog id="image-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close image search">×</button></form><h2>Find it with a photo</h2><p>Local color and texture matching. JPG, PNG or WebP, up to 5 MB.</p>
+<form action="/search/image" method="post" enctype="multipart/form-data" class="stack"><label for="image-input">Product image</label><input id="image-input" type="file" name="image" accept="image/jpeg,image/png,image/webp" required><img id="image-preview" alt="Your selected search image" hidden><button class="button">Find similar products</button></form></dialog>
+<dialog id="voice-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close voice search">×</button></form><h2>Say what you're looking for</h2><p id="voice-status" role="status">Use your microphone or type a simulated transcript below.</p>
+<button type="button" id="voice-record" class="button secondary">Start microphone</button>
+<form action="/search/voice" method="post" class="stack"><label for="transcript">Transcript</label><input name="transcript" id="transcript" placeholder="Wireless noise cancelling headphones" maxlength="500" required><button class="button">Search transcript</button></form></dialog>
+

@@ -1,0 +1,6 @@
+<nav class="category-nav container" aria-label="Product categories">
+  <a href="/search?q=electronics" class="all-category"><span aria-hidden="true">▦</span> Shop all</a>
+  {% for label,query in [('Laptops','laptop'),('Smartphones','phone'),('TV & Entertainment','TV'),('Audio','audio'),('Cameras','camera'),('Gaming','gaming'),('Smart Home','smart home'),('Accessories','accessories')] %}
+  <a href="/search?q={{ query|urlencode }}">{{ label }}</a>
+  {% endfor %}
+</nav>

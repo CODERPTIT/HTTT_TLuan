@@ -1,0 +1,149 @@
+{
+  "checks": [
+    {
+      "label": "home-desktop",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Smart technology.Made for real life.",
+      "width": 1440
+    },
+    {
+      "label": "cart-desktop",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Your shopping bag",
+      "width": 1440
+    },
+    {
+      "label": "checkout-desktop",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "One step closer.",
+      "width": 1440
+    },
+    {
+      "label": "order-success-desktop",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Good things are on their way.",
+      "width": 1440
+    },
+    {
+      "label": "desktop--search-q-gaming-laptop",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "gaming laptop",
+      "width": 1440
+    },
+    {
+      "label": "desktop--products-1",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "ASUS ROG Strix G16",
+      "width": 1440
+    },
+    {
+      "label": "desktop--orders-1",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Order #1",
+      "width": 1440
+    },
+    {
+      "label": "desktop--orders-1-tracking",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Your delivery, at a glance.",
+      "width": 1440
+    },
+    {
+      "label": "home-390",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Smart technology.Made for real life.",
+      "width": 390
+    },
+    {
+      "label": "search-390",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "electronics",
+      "width": 390
+    },
+    {
+      "label": "product-390",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "ASUS ROG Strix G16",
+      "width": 390
+    },
+    {
+      "label": "cart-empty-390",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Your shopping bag",
+      "width": 390
+    },
+    {
+      "label": "tracking-390",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Your delivery, at a glance.",
+      "width": 390
+    },
+    {
+      "label": "home-768",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Smart technology.Made for real life.",
+      "width": 768
+    },
+    {
+      "label": "search-768",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "electronics",
+      "width": 768
+    },
+    {
+      "label": "product-768",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "ASUS ROG Strix G16",
+      "width": 768
+    },
+    {
+      "label": "cart-empty-768",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Your shopping bag",
+      "width": 768
+    },
+    {
+      "label": "tracking-768",
+      "title": "ABC Electronics · Technology for your everyday",
+      "overflow": false,
+      "brokenImages": [],
+      "heading": "Your delivery, at a glance.",
+      "width": 768
+    }
+  ],
+  "javascriptErrors": []
+}

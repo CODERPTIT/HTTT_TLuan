@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="hero-label">NEW ARRIVAL</span>
+    <h1>Smart technology.<br>Made for real life.</h1>
+    <p>Discover powerful devices, clear specifications and products selected for work, play and home.</p>
+    <div class="hero-actions">
+      <a href="/products/4" class="button">View Galaxy S24</a>
+      <a href="/search?q=smartphone" class="text-link">Shop smartphones →</a>
+    </div>
+    <div class="hero-points"><span>24 products</span><span>8 categories</span><span>Smart local search</span></div>
+  </div>
+  <div class="hero-art">
+    <span class="hero-glow"></span>
+    <img src="/media/product-4.png" alt="Samsung Galaxy S24 product mockup" width="1254" height="1254">
+    <div class="hero-product"><small>FEATURED</small><b>Samsung Galaxy S24</b><span>Flagship performance · 256 GB</span></div>
+  </div>
+</section>
+
+<section class="section category-section">
+  <div class="section-heading"><div><span class="eyebrow">SHOP YOUR WAY</span><h2>Browse by category</h2></div><a href="/search?q=electronics">View all →</a></div>
+  <div class="category-grid category-visual-grid">
+    {% for product in category_products %}
+    <a href="/search?q=electronics&category={{ product.category.categoryName|urlencode }}">
+      <div><span>{{ '%02d'|format(loop.index) }}</span><b>{{ product.category.categoryName }}</b><small>Shop category →</small></div>
+      <img src="/media/product-{{ product.productId }}.png" alt="{{ product.category.categoryName }} category" loading="lazy">
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-heading"><div><span class="eyebrow">POPULAR RIGHT NOW</span><h2>Featured electronics</h2></div><a href="/search?q=electronics">View all products →</a></div>
+  <div class="product-grid">{% for product in products %}{% include 'components/product_card.html' %}{% endfor %}</div>
+</section>
+
+<section class="promo">
+  <div class="promo-copy"><span class="eyebrow">SONY WH-1000XM5</span><h2>Focus on what matters.</h2><p>Wireless noise cancelling headphones for work, travel and quiet moments.</p><a class="button light" href="/products/10">Discover audio</a></div>
+  <div class="promo-art"><span>30h<br><small>battery</small></span><img src="/media/product-10.png" alt="Sony wireless headphones product mockup" loading="lazy"></div>
+</section>
+{% include 'components/recommendation_section.html' %}
+<section class="section"><div class="section-heading"><div><span class="eyebrow">VALUE PICKS</span><h2>Electronics deals</h2></div><span class="muted">Sample offers from the current catalogue</span></div><div class="product-grid">{% for product in deals %}{% include 'components/product_card.html' %}{% endfor %}</div></section>
+{% endblock %}
