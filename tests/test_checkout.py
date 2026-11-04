@@ -21,7 +21,7 @@ def test_successful_checkout(services, method, status):
     assert order.status == "CONFIRMED"
     assert order.items[0].quantity == 2
     assert services.cart.viewCart(1).isEmpty()
-    assert services.order._getPayment(order.orderId).status == status
+    assert services.order.getPayment(order.orderId).status == status
     assert services.order.trackOrder(order.orderId).status == "PREPARING"
     assert services.checkout.service.products.findById(1).quantityAvailable == 10
     assert any(item.interactionType == "PURCHASE" for item in services.recommendation.service.getInteractionHistory(1))
@@ -35,7 +35,7 @@ def test_payment_failure_releases_stock(services):
         services.checkout.checkout(cart.cartId, "123 Nguyen Hue", "0901234567")
     assert services.checkout.service.products.findById(1).quantityAvailable == 12
     assert services.cart.viewCart(1).items[0].quantity == 2
-    assert services.order._listOrders(1) == []
+    assert services.order.listOrders(1) == []
 
 
 def test_late_failure_rolls_back_everything(container, monkeypatch):
@@ -59,7 +59,7 @@ def test_stock_changed_before_checkout(services):
     cart = add(services)
     product = services.checkout.service.products.findById(1)
     product.quantityAvailable = 1
-    services.checkout.service.products._updateStock(product)
+    services.checkout.service.products.updateStock(product)
     with pytest.raises(ValueError, match="Insufficient"):
         services.checkout.checkout(cart.cartId, "123 Nguyen Hue", "0901234567")
 

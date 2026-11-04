@@ -24,6 +24,9 @@ class SearchRepository:
         elif isinstance(query, ImageQuery):
             self.connection.execute(image_queries.insert().values(
                 search_query_id=query.searchQueryId, image_reference=query.imageReference))
+            if query.queryText:
+                self.connection.execute(text_queries.insert().values(
+                    search_query_id=query.searchQueryId, query_text=query.queryText))
         elif isinstance(query, VoiceQuery):
             self.connection.execute(voice_queries.insert().values(
                 search_query_id=query.searchQueryId, transcribed_text=query.transcribedText,
@@ -48,7 +51,10 @@ class SearchRepository:
         if row["type"] == "IMAGE":
             detail = self.connection.execute(select(image_queries).where(
                 image_queries.c.search_query_id == searchQueryId)).mappings().one()
-            return ImageQuery(imageReference=detail["image_reference"], **common)
+            text_detail = self.connection.execute(select(text_queries).where(
+                text_queries.c.search_query_id == searchQueryId)).mappings().first()
+            return ImageQuery(imageReference=detail["image_reference"],
+                              queryText=text_detail["query_text"] if text_detail else "", **common)
         if row["type"] == "VOICE":
             detail = self.connection.execute(select(voice_queries).where(
                 voice_queries.c.search_query_id == searchQueryId)).mappings().one()

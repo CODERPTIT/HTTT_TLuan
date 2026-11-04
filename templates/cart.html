@@ -1,3 +1,64 @@
-{% extends 'base.html' %}{% block content %}<div class="page-heading"><p class="breadcrumb"><a href="/">Home</a> / Bag</p><h1>Your shopping bag</h1><p>A few good choices for your everyday.</p></div>
-{% if cart.items %}<div class="commerce-layout"><section class="cart-items">{% for item in cart.items %}<article class="cart-row"><img src="/media/product-{{ item.product.productId }}.png" alt="{{ item.product.productName }}"><div><span class="eyebrow">{{ item.product.brand }}</span><h3><a href="/products/{{ item.product.productId }}">{{ item.product.productName }}</a></h3><p>{{ item.product.price|money }}</p><label for="qty-{{ item.product.productId }}">Quantity</label><input id="qty-{{ item.product.productId }}" class="cart-quantity" data-product="{{ item.product.productId }}" type="number" min="1" max="{{ item.product.quantityAvailable }}" value="{{ item.quantity }}"><button class="text-button remove-item" data-product="{{ item.product.productId }}">Remove</button></div><strong>{{ (item.product.price * item.quantity)|money }}</strong></article>{% endfor %}</section><aside class="summary"><h2>Order summary</h2><div><span>Subtotal</span><b>{{ cart.calculateTotal()|money }}</b></div><div><span>Demo delivery</span><span>Free</span></div><div class="total"><span>Total</span><b>{{ cart.calculateTotal()|money }}</b></div><a href="/checkout" class="button">Continue to checkout →</a><p class="muted">Your stock is confirmed at checkout.</p></aside></div>{% else %}<div class="empty-state"><span>♧</span><h2>Your cart is empty</h2><p>Find something that makes your everyday better.</p><a class="button" href="/search?q=electronics">Explore electronics</a></div>{% endif %}
-{% include 'components/recommendation_section.html' %}{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><p class="breadcrumb"><a href="/">Home</a> / Cart</p><h1>Your cart</h1><p>Review your items before checkout.</p></div>
+{% if cart.items %}
+<div class="checkout-stepper">
+  <div class="stepper-item active"><span class="step-num">1</span><b>Shopping Cart</b></div>
+  <div class="stepper-line"></div>
+  <div class="stepper-item"><span class="step-num">2</span><b>Shipping &amp; Payment</b></div>
+  <div class="stepper-line"></div>
+  <div class="stepper-item"><span class="step-num">3</span><b>Confirmation</b></div>
+</div>
+<div class="commerce-layout">
+  <section class="cart-items" aria-label="Cart items">
+    {% for item in cart.items %}
+    <article class="cart-row">
+      <a href="/products/{{ item.product.productId }}"><img src="/media/product-{{ item.product.productId }}.png" alt="{{ item.product.productName }}" loading="lazy"></a>
+      <div class="cart-row-info">
+        <span class="product-brand">{{ item.product.brand }}</span>
+        <h3><a href="/products/{{ item.product.productId }}">{{ item.product.productName }}</a></h3>
+        <p class="cart-unit-price">{{ item.product.price|money }} each</p>
+        <div class="cart-controls">
+          <label for="qty-{{ item.product.productId }}">Qty</label>
+          <div class="qty-stepper-wrap">
+            <button type="button" class="qty-btn dec" aria-label="Decrease quantity">−</button>
+            <input id="qty-{{ item.product.productId }}" class="cart-quantity" data-product="{{ item.product.productId }}" type="number" min="1" max="{{ item.product.quantityAvailable }}" value="{{ item.quantity }}">
+            <button type="button" class="qty-btn inc" aria-label="Increase quantity">+</button>
+          </div>
+          <button class="text-button remove-item" data-product="{{ item.product.productId }}" title="Remove item from bag">
+            <span aria-hidden="true">✕</span> Remove
+          </button>
+        </div>
+      </div>
+      <strong class="cart-line-total">{{ (item.product.price * item.quantity)|money }}</strong>
+    </article>
+    {% endfor %}
+  </section>
+  <aside class="summary">
+    <h2>Order summary</h2>
+    <div><span>Subtotal</span><b>{{ cart.calculateTotal()|money }}</b></div>
+    <div><span>Demo delivery</span><span style="color: #059669; font-weight: 700;">Free</span></div>
+    <div class="coupon-box" style="padding: 10px 0; display: flex; gap: 8px; width: 100%;">
+      <input type="text" id="coupon-code" placeholder="Promo code (e.g. ABCPROMO)" style="padding: 9px 12px; font-size: 12px; flex: 1 1 auto; min-width: 0;">
+      <button type="button" class="coupon-btn" onclick="if(window.notify) window.notify('Demo voucher applied: Free Shipping &amp; 12M Warranty active');">Apply</button>
+    </div>
+    <div class="total"><span>Total</span><b>{{ cart.calculateTotal()|money }}</b></div>
+    <a href="/checkout" class="button">Continue to checkout →</a>
+    <div class="trust-badges" style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-light); font-size: 12px; color: var(--muted); display: grid; gap: 6px;">
+      <span>🔒 256-bit Simulated SSL Checkout</span>
+      <span>🛡 Authentic 12-Month Guarantee</span>
+      <span>⚡ Instant Prototype Processing</span>
+    </div>
+    <p class="muted" style="margin-top: 10px; font-size: 11.5px;">Stock is reserved and verified at checkout.</p>
+  </aside>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon" style="font-size: 42px; margin-bottom: 8px;">🛍</div>
+  <h2>Your cart is empty</h2>
+  <p>Explore our catalogue of 24 flagship electronics and add something you like.</p>
+  <a class="button" href="/search?q=electronics">Explore products</a>
+</div>
+{% endif %}
+{% include 'components/recommendation_section.html' %}
+{% endblock %}

@@ -18,4 +18,5 @@ class Shipment:
     estimatedDeliveryDate: datetime
     deliveredAt: datetime | None = None
     _orderId: int = field(default=0, repr=False, compare=False)
+    shippingProviderId: int | None = field(default=None, repr=False, compare=False)
 

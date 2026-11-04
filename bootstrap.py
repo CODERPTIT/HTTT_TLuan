@@ -19,6 +19,9 @@ from application.search.text_embedding_service import TextEmbeddingService
 from application.search.image_embedding_service import ImageEmbeddingService
 from application.search.retrieval_service import RetrievalService
 from application.search.ranking_service import RankingService
+from application.search.reranking_service import RerankingService
+from application.search.query_filter_extraction_service import QueryFilterExtractionService
+from application.search.object_detector import ObjectDetector
 from application.recommendation.recommendation_service import RecommendationService
 from application.recommendation.content_based_recommender import ContentBasedRecommender
 from application.recommendation.collaborative_recommender import CollaborativeRecommender
@@ -32,6 +35,14 @@ from presentation.cart_controller import CartController
 from presentation.checkout_controller import CheckoutController
 from presentation.order_controller import OrderController
 from seeds.seed_data import seed
+from data.repository.account_repository import AccountRepository, seed_users
+from data.repository.staff_repository import StaffRepository
+from data.repository.customer_repository import CustomerRepository
+from data.repository.shipping_provider_repository import ShippingProviderRepository
+from application.account_service import AccountService
+from application.customer_service import CustomerService
+from application.staff_service import StaffService
+from application.shipping_provider_service import ShippingProviderService
 
 
 class Bootstrap:
@@ -41,22 +52,29 @@ class Bootstrap:
         self.database = ProductDatabase("sqlite:///" + (root / "electronics.db").as_posix())
         self.order_database = OrderDatabase(self.database.engine)
         self.database.create()
+        self.order_database.migrate_identity()
+        self.order_database.migrate_shipping_provider()
         with self.order_database.transaction() as connection:
+            seed_users(connection)
             seed(connection, self.images.root)
 
     @contextmanager
-    def scope(self):
+    def scope(self, immediate: bool = True):
         with self.order_database.transaction() as connection:
-            connection.exec_driver_sql("BEGIN IMMEDIATE")
+            if immediate:
+                connection.exec_driver_sql("BEGIN IMMEDIATE")
             products = ProductRepository(connection, self.images, VectorIndex())
-            interactions = InteractionRepository(connection, products)
+            customers = CustomerRepository(connection)
+            interactions = InteractionRepository(connection, products, customers)
             searches = SearchRepository(connection, products)
             carts = CartRepository(connection, products)
             orders = OrderRepository(connection, products)
             payments = PaymentRepository(connection)
             shipments = ShipmentRepository(connection)
             search = SearchService(QueryProcessor(SpeechToTextService()), RetrievalService(products),
-                RankingService(TextEmbeddingService(), ImageEmbeddingService(products), products), products, interactions, searches)
+                RankingService(TextEmbeddingService(), ImageEmbeddingService(products), products,
+                               RerankingService(), QueryFilterExtractionService()),
+                products, interactions, searches)
             recommendation = RecommendationService(products, interactions, ContentBasedRecommender(),
                 CollaborativeRecommender(interactions), HybridRankingService())
             cart = CartService(carts, products, interactions)
@@ -64,5 +82,8 @@ class Bootstrap:
             order = OrderService(orders, shipments, payments)
             yield SimpleNamespace(search=SearchController(search), recommendation=RecommendationController(recommendation),
                 cart=CartController(cart), checkout=CheckoutController(checkout), order=OrderController(order),
-                customer=interactions._customer(1))
+                auth=AccountService(AccountRepository(connection)), customers=CustomerService(customers),
+                staff=StaffService(StaffRepository(connection)), object_detector=ObjectDetector(),
+                shipping_provider=ShippingProviderService(ShippingProviderRepository(connection)),
+                speech=SpeechToTextService(), connection=connection)
 

@@ -15,7 +15,7 @@ class RecommendationService:
     def recommend(self, customerId: int, productId: int) -> list[Product]:
         source = self.products.findById(productId)
         candidates = self.filterEligibleProducts(self.generateCandidates(productId), productId)
-        collaborative_scores = {candidate.productId: self.calculateCollaborativeScore(customerId, candidate) for candidate in candidates}
+        collaborative_scores = self.collaborative.scores(productId, candidates)
         has_data = any(collaborative_scores.values())
         self.scores = {}
         for candidate in candidates:
@@ -32,8 +32,8 @@ class RecommendationService:
     def calculateContentScore(self, source: Product, candidate: Product) -> Decimal:
         return self.content.score(source, candidate)
 
-    def calculateCollaborativeScore(self, customerId: int, candidate: Product) -> Decimal:
-        return self.collaborative.score(customerId, candidate)
+    def calculateCollaborativeScore(self, viewedProductId: int, candidate: Product) -> Decimal:
+        return self.collaborative.score(viewedProductId, candidate)
 
     def calculateHybridScore(self, contentScore: Decimal, collaborativeScore: Decimal) -> Decimal:
         return self.hybrid.combine(contentScore, collaborativeScore)

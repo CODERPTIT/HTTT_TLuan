@@ -12,8 +12,21 @@
     </a>
     {% include 'components/search_bar.html' %}
     <nav class="header-actions" aria-label="Account navigation">
+      {% if account %}
+      {% if account.role == 'CUSTOMER' %}
       <a href="/orders" class="header-action"><span>Orders</span></a>
       <a href="/cart" class="header-action cart-link"><span>Cart</span><b id="cart-count" aria-label="Items added this visit">0</b></a>
+      {% elif account.role == 'SHIPPING_PROVIDER' %}<a href="/shipping" class="header-action"><span>Delivery dashboard</span></a>
+      {% else %}<a href="/staff" class="header-action"><span>Staff dashboard</span></a>{% endif %}
+      <details class="account-menu">
+        <summary><span class="profile-avatar">{{ account.initials }}</span><span class="account-summary"><b>{{ account.name }}</b><small>{{ account.role.replace('_', ' ').title() }}</small></span></summary>
+        <div class="account-dropdown">
+          <strong>{{ account.name }}</strong><span>{{ account.email }}</span><span class="profile-role">{{ account.role.replace('_', ' ').title() }}</span>
+          <a href="/profile">View profile</a>
+          <form action="/logout" method="post"><button type="submit">Sign out</button></form>
+        </div>
+      </details>
+      {% else %}<a href="/cart" class="header-action cart-link"><span>Cart</span></a><a href="/login" class="header-action">Sign in</a>{% endif %}
     </nav>
   </div>
   {% include 'components/category_nav.html' %}

@@ -1,1 +1,9 @@
-{% extends 'base.html' %}{% block content %}<section class="confirmation"><span class="success-mark">✓</span><span class="eyebrow">THANK YOU FOR SHOPPING WITH US</span><h1>Good things are on their way.</h1><p>Order confirmed · #{{ order.orderId }}</p><div class="confirmation-grid"><div><small>PAYMENT</small><b>{{ payment.status }}</b></div><div><small>SHIPMENT</small><b>{{ shipment.status }}</b></div><div><small>ESTIMATED DELIVERY</small><b>{{ shipment.estimatedDeliveryDate.strftime('%d %b %Y') }}</b></div></div><div class="button-row"><a class="button" href="/orders/{{ order.orderId }}">View order</a><a class="button secondary" href="/">Continue shopping</a></div></section>{% endblock %}
+{% extends 'base.html' %}{% block content %}
+<div class="checkout-stepper" style="margin-top: 24px;">
+  <div class="stepper-item completed"><span class="step-num">✓</span><b>Shopping Cart</b></div>
+  <div class="stepper-line completed"></div>
+  <div class="stepper-item completed"><span class="step-num">✓</span><b>Shipping &amp; Payment</b></div>
+  <div class="stepper-line completed"></div>
+  <div class="stepper-item completed active"><span class="step-num">✓</span><b>Confirmation</b></div>
+</div>
+<section class="confirmation"><span class="success-mark">✓</span><span class="eyebrow">THANK YOU FOR SHOPPING WITH US</span><h1>Good things are on their way.</h1><p>Order confirmed · #{{ order.orderId }}</p><div class="confirmation-grid"><div><small>PAYMENT</small><b>{{ payment.status }}</b></div><div><small>SHIPMENT</small><b>{{ shipment.status }}</b></div><div><small>ESTIMATED DELIVERY</small><b>{{ shipment.estimatedDeliveryDate.strftime('%d %b %Y') }}</b></div></div><div class="button-row"><a class="button" href="/orders/{{ order.orderId }}">View order</a><a class="button secondary" href="/">Continue shopping</a></div></section>{% endblock %}

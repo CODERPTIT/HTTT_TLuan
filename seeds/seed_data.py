@@ -7,10 +7,10 @@ from domain.product.product import Product, ProductStatus
 from domain.product.category import Category
 from domain.product.product_unit import ProductUnit
 from domain.product.product_specification import ProductSpecification
-from data.infrastructure.product_database import categories, products
-from data.infrastructure.order_database import customers
+from data.infrastructure.product_database import categories, products, specifications
 from data.repository.product_repository import ProductRepository
 from data.repository.interaction_repository import InteractionRepository
+from data.repository.customer_repository import CustomerRepository
 from domain.interaction.interaction import InteractionType
 
 CATALOG = [
@@ -39,6 +39,28 @@ CATALOG = [
     ("Accessories", "Lenovo", "USB-C Dock", "Expand your laptop connectivity", 1790000, "HDMI · USB 3 · 100 W"),
     ("Accessories", "Dell", "UltraSharp 27", "Crisp monitor for creative work", 7990000, "27 inch · QHD · IPS"),
 ]
+
+PRODUCT_COLORS = (
+    "gray", "silver", "silver", "black", "silver", "blue", "black", "black",
+    "black", "black", "blue", "white", "black", "black", "black", "white",
+    "white", "black", "white", "white", "black", "gray", "silver", "black",
+)
+
+
+def ensure_filter_specifications(connection) -> None:
+    product_ids = set(connection.execute(select(products.c.id)).scalars())
+    for product_id, color in enumerate(PRODUCT_COLORS, 1):
+        if product_id not in product_ids:
+            continue
+        existing = connection.execute(select(specifications.c.id, specifications.c.value).where(
+            specifications.c.product_id == product_id,
+            specifications.c.name == "Color")).first()
+        if existing is None:
+            connection.execute(specifications.insert().values(
+                product_id=product_id, name="Color", value=color))
+        elif existing.value != color:
+            connection.execute(specifications.update().where(
+                specifications.c.id == existing.id).values(value=color))
 
 
 def draw_product(path: Path, category: str, variant: int) -> None:
@@ -88,27 +110,27 @@ def seed(connection, image_root: Path) -> None:
     for identity, entry in enumerate(CATALOG, 1):
         path = image_root / f"product-{identity}.png"
         asset = asset_root / f"product-{identity}.png"
-        if asset.exists():
-            copyfile(asset, path)
-        elif not path.exists():
-            draw_product(path, entry[0], identity)
+        if not path.exists():
+            if asset.exists():
+                copyfile(asset, path)
+            else:
+                draw_product(path, entry[0], identity)
     if connection.execute(select(products.c.id).limit(1)).first():
+        ensure_filter_specifications(connection)
         return
     names = list(dict.fromkeys(entry[0] for entry in CATALOG))
     for identity, name in enumerate(names, 1):
         connection.execute(categories.insert().values(id=identity, name=name))
-    for identity in range(1, 4):
-        connection.execute(customers.insert().values(id=identity, name=f"Demo Customer {identity}",
-            email=f"demo{identity}@example.test", phone="0901234567", address="123 Nguyen Hue, Ho Chi Minh City"))
     repository = ProductRepository(connection)
     for identity, (category, brand, model, description, price, specification) in enumerate(CATALOG, 1):
         repository.save(Product(identity, f"{brand} {model}", brand, model, description,
             Decimal(price), ProductStatus.OUT_OF_STOCK if identity == 24 else ProductStatus.ACTIVE,
             Category(names.index(category) + 1, category),
             0 if identity == 24 else 12, [ProductUnit(f"ABC-{identity:03}-001")],
-            [ProductSpecification(0, "Key features", specification), ProductSpecification(0, "Warranty", "12 months")]))
-    interactions = InteractionRepository(connection, repository)
+            [ProductSpecification(0, "Key features", specification), ProductSpecification(0, "Warranty", "12 months"),
+             ProductSpecification(0, "Color", PRODUCT_COLORS[identity - 1])]))
+    interactions = InteractionRepository(connection, repository, CustomerRepository(connection))
     for customerId, productId, kind in [(1, 1, "VIEW"), (2, 1, "VIEW"), (2, 2, "PURCHASE"),
                                        (2, 10, "ADD_TO_CART"), (3, 1, "CLICK"), (3, 3, "PURCHASE")]:
-        interactions._record(customerId, repository.findById(productId), InteractionType(kind))
+        interactions.record(customerId, repository.findById(productId), InteractionType(kind))
 

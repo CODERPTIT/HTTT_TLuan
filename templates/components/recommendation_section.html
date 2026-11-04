@@ -1,9 +1,6 @@
 {% if recommendations %}
-<section class="section">
-  <div class="section-heading">
-    <div><span class="eyebrow">PICKED FOR YOU</span><h2>Recommended products</h2></div>
-    <span class="muted">Based on product and interaction signals</span>
-  </div>
+<section class="section recommendation-section">
+  <div class="section-heading"><div><span class="eyebrow">SELECTED FOR YOU</span><h2>Recommended for you</h2><p class="section-subtitle">{{ 'Based on your browsing activity' if account and account.role == 'CUSTOMER' else 'Popular alternatives based on product similarity' }}</p></div><a href="/search?q=electronics">Browse all →</a></div>
   <div class="product-grid">{% for product in recommendations %}{% include 'components/product_card.html' %}{% endfor %}</div>
 </section>
 {% endif %}

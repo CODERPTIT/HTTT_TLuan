@@ -1,0 +1,54 @@
+{% extends 'base.html' %}{% block content %}
+<div class="profile-page">
+  <aside class="profile-identity">
+    <div class="profile-avatar profile-avatar-large">{{ profile.initials }}</div>
+    <span class="profile-role">{{ profile.role.replace('_', ' ').title() }}</span>
+    <h1>{{ profile.name }}</h1>
+    <p>{{ profile.email }}</p>
+    <small>Account #{{ profile.id }} · {{ 'Active' if profile.active else 'Inactive' }}</small>
+    {% if profile.role == 'CUSTOMER' %}<nav class="profile-links"><a href="/orders">My orders</a><a href="/cart">Shopping cart</a></nav>
+    {% elif profile.role == 'SHIPPING_PROVIDER' %}<nav class="profile-links"><a href="/shipping">Delivery dashboard</a></nav>
+    {% else %}<nav class="profile-links"><a href="/staff">Staff dashboard</a></nav>{% endif %}
+  </aside>
+
+  <section class="profile-content">
+    {% if saved %}<div class="profile-success" role="status">Profile updated successfully.</div>{% endif %}
+    <div class="page-heading"><span class="eyebrow">ACCOUNT PROFILE</span><h2>Personal information</h2><p>This identity controls access, ownership and personalized data.</p></div>
+    {% if profile.role == 'CUSTOMER' %}
+    <form action="/profile" method="post" class="profile-form stack">
+      <label for="profile-name">Full name</label><input id="profile-name" name="name" value="{{ profile.name }}" minlength="2" maxlength="100" required>
+      <label for="profile-email">Email address</label><input id="profile-email" value="{{ profile.email }}" readonly><small>Email is the unique login identity.</small>
+      <label for="profile-phone">Phone number</label><input id="profile-phone" name="phone" value="{{ profile.phone }}" maxlength="20" autocomplete="tel">
+      <label for="profile-address">Default delivery address</label><textarea id="profile-address" name="address" maxlength="500" autocomplete="street-address">{{ profile.address }}</textarea>
+      <button class="button">Save profile</button>
+    </form>
+    <div class="profile-stats">
+      <article><strong>{{ profile.stats.orders }}</strong><span>Orders</span></article>
+      <article><strong>{{ profile.stats.searches }}</strong><span>Saved searches</span></article>
+      <article><strong>{{ profile.stats.interactions }}</strong><span>Interactions</span></article>
+    </div>
+    {% elif profile.role == 'SHIPPING_PROVIDER' %}
+    <dl class="profile-readonly">
+      <div><dt>Email identity</dt><dd>{{ profile.email }}</dd></div>
+      <div><dt>Assigned role</dt><dd>Shipping Provider</dd></div>
+      <div><dt>Provider code</dt><dd>{{ profile.provider_code }}</dd></div>
+      <div><dt>Provider name</dt><dd>{{ profile.provider_name }}</dd></div>
+      <div><dt>Support email</dt><dd>{{ profile.support_email }}</dd></div>
+      <div><dt>Support phone</dt><dd>{{ profile.support_phone }}</dd></div>
+      <div><dt>Business address</dt><dd>{{ profile.provider_address }}</dd></div>
+      <div><dt>Account status</dt><dd>{{ 'Active' if profile.active else 'Inactive' }}</dd></div>
+    </dl>
+    {% else %}
+    <dl class="profile-readonly">
+      <div><dt>Email identity</dt><dd>{{ profile.email }}</dd></div>
+      <div><dt>Assigned role</dt><dd>{{ profile.role.replace('_', ' ').title() }}</dd></div>
+      <div><dt>Employee code</dt><dd>{{ profile.employee_code }}</dd></div>
+      <div><dt>Department</dt><dd>{{ profile.department }}</dd></div>
+      <div><dt>Position</dt><dd>{{ profile.position }}</dd></div>
+      <div><dt>Account status</dt><dd>{{ 'Active' if profile.active else 'Inactive' }}</dd></div>
+      <div><dt>Permissions</dt><dd>Managed by the role-based access rules of the staff workspace.</dd></div>
+    </dl>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

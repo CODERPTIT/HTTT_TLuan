@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}ABC Electronics · Technology for your everyday{% endblock %}</title>
-{% for sheet in ['tokens','base','layout','components','pages'] %}<link rel="stylesheet" href="/static/css/{{ sheet }}.css">{% endfor %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% for sheet in ['tokens','base','layout','components','pages','marketplace'] %}<link rel="stylesheet" href="/static/css/{{ sheet }}.css">{% endfor %}
 <script src="/static/js/app.js" defer></script><script src="/static/js/search.js" defer></script>
 <script src="/static/js/cart.js" defer></script><script src="/static/js/checkout.js" defer></script>
 <script src="/static/js/voice_search.js" defer></script>

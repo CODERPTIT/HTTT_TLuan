@@ -38,3 +38,23 @@ document.querySelectorAll(".remove-item").forEach(button => {
   });
 });
 
+document.querySelectorAll(".qty-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const wrap = button.closest(".qty-stepper-wrap");
+    if (!wrap) return;
+    const input = wrap.querySelector(".cart-quantity");
+    if (!input) return;
+    const currentVal = parseInt(input.value, 10) || 1;
+    const min = parseInt(input.min, 10) || 1;
+    const max = parseInt(input.max, 10) || 999;
+    if (button.classList.contains("inc") && currentVal < max) {
+      input.value = currentVal + 1;
+      input.dispatchEvent(new Event("change"));
+    } else if (button.classList.contains("dec") && currentVal > min) {
+      input.value = currentVal - 1;
+      input.dispatchEvent(new Event("change"));
+    }
+  });
+});
+
+

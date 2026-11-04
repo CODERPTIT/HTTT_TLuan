@@ -1,6 +1,14 @@
-__pycache__/
+﻿__pycache__/
+*.py[cod]
 .pytest_cache/
 .venv/
+.env
 *.db
 runtime/
-
+artifacts/
+docs/
+tools/
+test_images/
+*.docx
+*.vpp
+*.vpp.*

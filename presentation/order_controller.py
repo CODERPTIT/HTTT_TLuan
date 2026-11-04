@@ -14,9 +14,9 @@ class OrderController:
     def trackOrder(self, orderId: int) -> Shipment:
         return self.service.getShipment(orderId)
 
-    def _getPayment(self, orderId: int) -> Payment:
-        return self.service._getPayment(orderId)
+    def getPayment(self, orderId: int) -> Payment:
+        return self.service.getPayment(orderId)
 
-    def _listOrders(self, customerId: int) -> list[Order]:
-        return self.service._listOrders(customerId)
+    def listOrders(self, customerId: int) -> list[Order]:
+        return self.service.listOrders(customerId)
 

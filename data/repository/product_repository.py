@@ -58,19 +58,22 @@ class ProductRepository:
         for unit in product.units:
             self.connection.execute(units.insert().values(serial=unit.serialNumber, product_id=product.productId))
 
-    def _updateStock(self, product: Product) -> None:
+    def updateStock(self, product: Product) -> None:
         self.connection.execute(products.update().where(products.c.id == product.productId)
                                 .values(quantity_available=product.quantityAvailable))
 
-    def _saveImage(self, content: bytes, filename: str, content_type: str) -> str:
+    def saveImage(self, content: bytes, filename: str, content_type: str) -> str:
         return self.image_storage.save(content, filename, content_type)
 
-    def _imagePath(self, reference: str):
+    def cropImage(self, reference: str, box: list[float]) -> str:
+        return self.image_storage.crop(reference, box)
+
+    def imagePath(self, reference: str):
         return self.image_storage.resolve(reference)
 
-    def _indexVector(self, productId: int, vector: list[float]) -> None:
+    def indexVector(self, productId: int, vector: list[float]) -> None:
         self.vector_index.store(productId, vector)
 
-    def _searchVectors(self, vector: list[float]) -> list[tuple[int, float]]:
+    def searchVectors(self, vector: list[float]) -> list[tuple[int, float]]:
         return self.vector_index.search(vector)
 

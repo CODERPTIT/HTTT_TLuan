@@ -39,7 +39,7 @@ class CheckoutService:
             for item in cart.items:
                 product = self.products.findById(item.product.productId)
                 product.reserve(item.quantity)
-                self.products._updateStock(product)
+                self.products.updateStock(product)
                 self.reserved.append((item.product.productId, item.quantity))
             order = self.createOrder(cart, shippingAddress.strip(), recipientPhone.strip())
             payment = self.processPayment(order)
@@ -52,9 +52,10 @@ class CheckoutService:
             shipment = Shipment("ABC-" + uuid4().hex[:12].upper(), ShipmentStatus.PREPARING,
                 "ABC Demo Delivery", datetime.now(timezone.utc) + timedelta(days=3))
             shipment._orderId = order.orderId
+            shipment.shippingProviderId = self.shipments.defaultProviderId()
             self.shipments.save(shipment)
             for item in cart.items:
-                self.interactions._record(cart.customerId, item.product, InteractionType.PURCHASE)
+                self.interactions.record(cart.customerId, item.product, InteractionType.PURCHASE)
             cart.items.clear()
             self.carts.update(cart)
             self.reserved = []
@@ -97,6 +98,6 @@ class CheckoutService:
         for productId, quantity in self.reserved:
             product = self.products.findById(productId)
             product.release(quantity)
-            self.products._updateStock(product)
+            self.products.updateStock(product)
         self.reserved = []
 

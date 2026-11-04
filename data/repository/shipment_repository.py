@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import select
 from domain.order.shipment import Shipment, ShipmentStatus
-from data.infrastructure.order_database import shipments
+from data.infrastructure.order_database import shipments, shipping_providers
 
 
 class ShipmentRepository:
@@ -14,7 +14,7 @@ class ShipmentRepository:
             raise LookupError("Shipment not available yet")
         return Shipment(row["tracking"], ShipmentStatus(row["status"]), row["carrier"],
             datetime.fromisoformat(row["estimated"]), datetime.fromisoformat(row["delivered"]) if row["delivered"] else None,
-            row["order_id"])
+            row["order_id"], row["shipping_provider_id"])
 
     def findByOrder(self, orderId: int) -> Shipment:
         return self._find(select(shipments).where(shipments.c.order_id == orderId))
@@ -22,12 +22,20 @@ class ShipmentRepository:
     def findByTrackingNumber(self, trackingNumber: str) -> Shipment:
         return self._find(select(shipments).where(shipments.c.tracking == trackingNumber))
 
+    def defaultProviderId(self) -> int:
+        provider_id = self.connection.execute(select(shipping_providers.c.id).order_by(
+            shipping_providers.c.id)).scalar()
+        if provider_id is None:
+            raise LookupError("No shipping provider is available")
+        return provider_id
+
     def save(self, shipment: Shipment) -> None:
         if shipment._orderId <= 0:
             raise ValueError("Shipment must be associated with an order")
         self.connection.execute(shipments.insert().values(tracking=shipment.trackingNumber, order_id=shipment._orderId,
             status=shipment.status, carrier=shipment.carrier, estimated=shipment.estimatedDeliveryDate.isoformat(),
-            delivered=shipment.deliveredAt.isoformat() if shipment.deliveredAt else None))
+            delivered=shipment.deliveredAt.isoformat() if shipment.deliveredAt else None,
+            shipping_provider_id=shipment.shippingProviderId))
 
     def update(self, shipment: Shipment) -> None:
         self.connection.execute(shipments.update().where(shipments.c.tracking == shipment.trackingNumber).values(

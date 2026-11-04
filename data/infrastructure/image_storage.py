@@ -38,3 +38,21 @@ class ImageStorage:
             raise ValueError("Image not found")
         return path
 
+    def crop(self, reference: str, box: list[float]) -> str:
+        if len(box) != 4 or any(not isinstance(value, (float, int)) or isinstance(value, bool)
+                                for value in box):
+            raise ValueError("Invalid crop area")
+        left, top, right, bottom = box
+        if not (0 <= left < right <= 1 and 0 <= top < bottom <= 1):
+            raise ValueError("Invalid crop area")
+        with Image.open(self.resolve(reference)) as source:
+            from PIL import ImageOps
+            picture = ImageOps.exif_transpose(source).convert("RGB")
+            width, height = picture.size
+            cropped = picture.crop((int(left * width), int(top * height),
+                                    max(int(right * width), int(left * width) + 1),
+                                    max(int(bottom * height), int(top * height) + 1)))
+            buffer = BytesIO()
+            cropped.save(buffer, format="JPEG", quality=90)
+        return self.save(buffer.getvalue(), "crop.jpg", "image/jpeg")
+

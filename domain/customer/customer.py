@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+from domain.user.user import User
+
 
 @dataclass
-class Customer:
-    customerId: int
-    fullName: str
-    email: str
-    phoneNumber: str
-    deliveryAddress: str
+class Customer(User):
+    deliveryAddress: str = ""
+
+    @property
+    def customerId(self) -> int:
+        return self.userId
 

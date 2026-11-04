@@ -13,7 +13,9 @@ class QueryProcessor:
             query.queryText = " ".join(query.queryText.split()).lower()
         elif isinstance(query, VoiceQuery):
             query.transcribedText = " ".join((query.transcribedText or self.speech.transcribe(query.audioReference)).split()).lower()
-        elif not isinstance(query, ImageQuery):
+        elif isinstance(query, ImageQuery):
+            query.queryText = " ".join(query.queryText.split()).lower()
+        else:
             raise ValueError("Unsupported search modality")
         return query
 

@@ -1,23 +1,19 @@
 <article class="product-card">
   <a href="/products/{{ product.productId }}" class="product-image">
-    <span class="product-badge">{{ product.category.categoryName }}</span>
     <img src="/media/product-{{ product.productId }}.png" alt="{{ product.productName }}" width="640" height="480" loading="lazy">
+    {% if match_percent is defined and match_percent is not none %}<span class="product-match-badge"><span aria-hidden="true" style="color: #3b82f6;">✦</span> Match {{ match_percent }}%</span>{% endif %}
   </a>
   <div class="product-card-body">
-    <span class="product-brand">{{ product.brand }}</span>
+    <span class="product-brand">{{ product.brand }} · {{ product.category.categoryName }}</span>
     <h3><a href="/products/{{ product.productId }}">{{ product.productName }}</a></h3>
-    <p class="card-description">{{ product.description }}</p>
-    <div class="product-meta">
-      <p class="price">{{ product.price|money }}</p>
-      <span class="stock {{ 'unavailable' if not product.isAvailable(1) or product.status != 'ACTIVE' }}">{{ 'In stock' if product.isAvailable(1) and product.status == 'ACTIVE' else 'Unavailable' }}</span>
-    </div>
-    <div class="product-actions">
-      <a class="details-link" href="/products/{{ product.productId }}">Details</a>
-      <form action="/cart/items" method="post" class="add-cart">
+    <p class="price">{{ product.price|money }}</p>
+    <div class="product-card-bottom">
+      <span class="stock {{ 'unavailable' if not product.isAvailable(1) or product.status != 'ACTIVE' }}">{{ 'In stock' if product.isAvailable(1) and product.status == 'ACTIVE' else 'Out of stock' }}</span>
+      {% if account and account.role == 'CUSTOMER' %}<form action="/cart/items" method="post" class="add-cart">
         <input type="hidden" name="productId" value="{{ product.productId }}">
         <input type="hidden" name="quantity" value="1">
-        <button class="button compact" {% if not product.isAvailable(1) or product.status != 'ACTIVE' %}disabled{% endif %}>Add to cart</button>
-      </form>
+        <button class="card-cart-button" aria-label="Add {{ product.productName }} to cart" {% if not product.isAvailable(1) or product.status != 'ACTIVE' %}disabled{% endif %}><span aria-hidden="true" style="font-size: 11px;">🛒</span> + Cart</button>
+      </form>{% else %}<a class="card-cart-button" href="/login?next=/products/{{ product.productId }}">Sign in to buy</a>{% endif %}
     </div>
   </div>
 </article>

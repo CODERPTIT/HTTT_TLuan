@@ -1,1 +1,59 @@
-{% extends 'base.html' %}{% block content %}<div class="page-heading"><h1>Your orders</h1><p>Follow every step of your next upgrade.</p></div>{% if orders %}<div class="order-list">{% for order in orders %}<a href="/orders/{{ order.orderId }}" class="order-link"><b>Order #{{ order.orderId }}</b><span>{{ order.orderDate.strftime('%d %b %Y') }}</span><span class="badge">{{ order.status }}</span><span>View order →</span></a>{% endfor %}</div>{% else %}<div class="empty-state"><h2>No orders yet</h2><p>Your confirmed orders will appear here.</p><a href="/search?q=electronics" class="button">Explore electronics</a></div>{% endif %}{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><p class="breadcrumb"><a href="/">Home</a> / Orders</p><h1>Your orders</h1><p>Check your purchases, simulated payments and delivery progress.</p></div>
+{% if orders %}
+<div class="order-list">
+  {% for order in orders %}
+  <article class="order-card">
+    <div class="order-card-header"><div><strong>Order #{{ order.orderId }}</strong><span>{{ order.orderDate.strftime('%d %b %Y') }}</span></div><span class="badge">{{ order.status }}</span></div>
+    {% for item in order.items[:2] %}
+    <div class="order-product"><img src="/media/product-{{ item.product.productId }}.png" alt="" loading="lazy"><div><a href="/products/{{ item.product.productId }}">{{ item.product.productName }}</a><small>Qty {{ item.quantity }}</small></div><b>{{ (item.product.price * item.quantity)|money }}</b></div>
+    {% endfor %}
+    {% if order.items|length > 2 %}<p class="muted">+ {{ order.items|length - 2 }} more items</p>{% endif %}
+    {% set total = namespace(amount=0) %}{% for item in order.items %}{% set total.amount = total.amount + item.product.price * item.quantity %}{% endfor %}
+    <div class="order-card-footer"><span>Total <strong>{{ total.amount|money }}</strong></span><div><a href="/orders/{{ order.orderId }}">View details</a><a href="/orders/{{ order.orderId }}/tracking">Track order →</a></div></div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon" style="font-size: 46px; margin-bottom: 8px;">📦</div>
+  <h2>No orders yet</h2>
+  <p>Your completed checkouts and delivery tracking will appear here once placed.</p>
+  <a href="/search?q=electronics" class="button">Continue shopping</a>
+</div>
+
+<section class="section" style="margin-block: 36px 48px;">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">EXPLORE CATALOGUE</span>
+      <h2>Start your first order</h2>
+      <p class="section-subtitle">Discover top-rated electronic devices with fast demo delivery</p>
+    </div>
+    <a href="/search?q=electronics">View all catalogue →</a>
+  </div>
+  <div class="category-grid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <a href="/search?q=laptop" class="category-card-mini">
+      <span class="category-badge">LAPTOPS</span>
+      <b>Work &amp; Gaming</b>
+      <small>Apple, ASUS, Dell, Lenovo</small>
+    </a>
+    <a href="/search?q=phone" class="category-card-mini">
+      <span class="category-badge">SMARTPHONES</span>
+      <b>Flagship Phones</b>
+      <small>Samsung Galaxy, iPhone, Pixel</small>
+    </a>
+    <a href="/search?q=TV" class="category-card-mini">
+      <span class="category-badge">ENTERTAINMENT</span>
+      <b>4K &amp; OLED TVs</b>
+      <small>Samsung Neo QLED, LG OLED</small>
+    </a>
+    <a href="/search?q=audio" class="category-card-mini">
+      <span class="category-badge">AUDIO</span>
+      <b>Noise Cancelling</b>
+      <small>Sony, Apple AirPods, JBL</small>
+    </a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

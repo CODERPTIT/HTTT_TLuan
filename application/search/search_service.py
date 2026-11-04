@@ -21,7 +21,8 @@ class SearchService:
             raise ValueError("Enter a search query of up to 500 characters")
         processed = self.processQuery(query)
         results = self.rankResults(self.retrieveProducts(processed), processed)
-        self.searches.save(processed, results, self.customerId)
+        if self.customerId is not None:
+            self.searches.save(processed, results, self.customerId)
         return results
 
     def validateInput(self, query: SearchQuery) -> bool:
@@ -29,7 +30,7 @@ class SearchService:
             return bool(query.queryText.strip()) and len(query.queryText) <= 500
         if isinstance(query, VoiceQuery):
             return bool(query.transcribedText.strip() or query.audioReference.strip()) and max(len(query.transcribedText), len(query.audioReference)) <= 1000
-        return isinstance(query, ImageQuery) and bool(query.imageReference)
+        return isinstance(query, ImageQuery) and bool(query.imageReference) and len(query.queryText) <= 500
 
     def processQuery(self, query: SearchQuery) -> SearchQuery:
         return self.processor.process(query)
@@ -40,22 +41,29 @@ class SearchService:
     def rankResults(self, products: list[Product], query: SearchQuery) -> list[SearchResult]:
         return self.ranking.rank(products, query)
 
-    def _upload(self, content: bytes, filename: str, content_type: str) -> str:
-        return self.products._saveImage(content, filename, content_type)
+    def upload(self, content: bytes, filename: str, content_type: str) -> str:
+        return self.products.saveImage(content, filename, content_type)
 
-    def _catalog(self):
+    def crop(self, reference: str, box: list[float]) -> str:
+        return self.products.cropImage(reference, box)
+
+    def catalog(self):
         return self.products.findRelevant(None)
 
-    def _product(self, productId: int, customerId: int):
+    def getProduct(self, productId: int, customerId: int | None):
         from domain.interaction.interaction import InteractionType
         product = self.products.findById(productId)
-        self.interactions._record(customerId, product, InteractionType.VIEW)
+        if customerId is not None:
+            self.interactions.record(customerId, product, InteractionType.VIEW)
         return product
 
-    def _filterResults(self, results, category="", brand="", minimum=0, maximum=None, available=False, sort="relevance"):
+    def filterResults(self, results, category="", brand="", minimum=0, maximum=None, available=False,
+                      sort="relevance", color=""):
         filtered = [result for result in results
                     if (not category or result.product.category.categoryName == category)
                     and (not brand or result.product.brand == brand)
+                    and (not color or any(spec.specName == "Color" and spec.specValue == color
+                                          for spec in result.product.specifications))
                     and result.product.price >= minimum
                     and (maximum is None or result.product.price <= maximum)
                     and (not available or (result.product.status == "ACTIVE" and result.product.isAvailable(1)))]

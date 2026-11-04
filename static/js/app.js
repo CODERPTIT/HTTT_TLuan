@@ -17,5 +17,15 @@ window.addEventListener("pageshow", () => {
     button.disabled = false;
     button.classList.remove("is-loading");
   });
+  // Close account dropdown on page load/back-navigation
+  document.querySelectorAll(".account-menu[open]").forEach(el => el.removeAttribute("open"));
 });
+
+// Close account dropdown when clicking outside
+document.addEventListener("click", (e) => {
+  document.querySelectorAll(".account-menu[open]").forEach(menu => {
+    if (!menu.contains(e.target)) menu.removeAttribute("open");
+  });
+});
+
 

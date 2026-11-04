@@ -10,8 +10,9 @@ const python = process.env.ABC_PYTHON || "python";
 const temporary = await mkdtemp(path.join(tmpdir(), "abc-browser-"));
 const artifacts = path.join(root, "artifacts");
 await mkdir(artifacts, { recursive: true });
-const server = spawn(python, ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8765"], {
-  cwd: root, windowsHide: true, stdio: "ignore", env: { ...process.env, ABC_RUNTIME: path.join(temporary, "data") }
+const server = spawn(python, ["-m", "uvicorn", "browser_app:app", "--app-dir", "tests", "--host", "127.0.0.1", "--port", "8765"], {
+  cwd: root, windowsHide: true, stdio: "ignore",
+  env: { ...process.env, ABC_RUNTIME: path.join(temporary, "data"), AI_IMAGE_MODE: "basic", AI_DETECT_MODE: "off" }
 });
 const browser = spawn(chrome, ["--headless=new", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
   "--remote-debugging-port=9228", "--remote-allow-origins=http://localhost:9228",
@@ -93,6 +94,14 @@ try {
   await call("Page.enable");
   await call("Runtime.enable");
   await call("Emulation.setDeviceMetricsOverride", { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+  await navigate("/login");
+  await inspect("login-desktop", true);
+  await evaluate("document.querySelector('#email').value = 'demo1@example.test'; document.querySelector('#password').value = 'DemoCustomer123!'; document.querySelector('form[action=\"/login\"]').requestSubmit()");
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (await evaluate("location.pathname === '/' && document.readyState === 'complete'")) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  if (!await evaluate("location.pathname === '/'")) throw new Error("Customer sign-in failed");
   await navigate("/");
   await inspect("home-desktop", true);
   await evaluate("document.querySelector('.add-cart button').click()");
@@ -115,9 +124,9 @@ try {
   }
   await inspect("order-success-desktop", true);
   if (!await evaluate("document.body.textContent.includes('Order confirmed')")) throw new Error("Checkout UI failed");
-  for (const url of ["/search?q=gaming+laptop", "/products/1", "/orders/1", "/orders/1/tracking"]) {
+  for (const url of ["/search?q=gaming+laptop", "/products/1", "/orders", "/orders/1", "/orders/1/tracking"]) {
     await navigate(url);
-    await inspect("desktop-" + url.replace(/[^a-z0-9]/gi, "-"));
+    await inspect("desktop-" + url.replace(/[^a-z0-9]/gi, "-"), url === "/orders");
   }
   for (const width of [390, 768]) {
     await call("Emulation.setDeviceMetricsOverride", { width, height: 844, deviceScaleFactor: 1, mobile: false });
@@ -127,6 +136,32 @@ try {
       await inspect(label + "-" + width, width === 390 && ["home", "search", "tracking"].includes(label));
     }
   }
+  await navigate("/");
+  await evaluate("document.getElementById('image-open').click()");
+  if (!await evaluate("document.getElementById('image-dialog').open")) throw new Error("Image dialog failed");
+  await evaluate("window.originalFetch = window.fetch; window.fetch = (url, options) => url === '/search/detect' ? Promise.resolve(new Response(JSON.stringify({available: true, objects: [{label: 'Smartphone', box: [0.1, 0.1, 0.8, 0.8]}]}), {status: 200, headers: {'Content-Type': 'application/json'}})) : window.originalFetch(url, options)");
+  await evaluate("fetch('/media/product-4.png').then(async response => { const blob = await response.blob(); const transfer = new DataTransfer(); transfer.items.add(new File([blob], 'phone.png', {type: 'image/png'})); const input = document.getElementById('image-input'); input.files = transfer.files; input.dispatchEvent(new Event('change')); })");
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (await evaluate("document.querySelectorAll('.detection-box').length === 1")) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  if (!await evaluate("document.querySelectorAll('.detection-box').length === 1")) throw new Error("Automatic detection UI failed");
+  await evaluate("document.querySelector('.detection-box').click()");
+  if (!await evaluate("document.getElementById('crop-box').value !== ''")) throw new Error("Object selection failed");
+  await evaluate("document.querySelector('.detection-box').click()");
+  if (!await evaluate("document.getElementById('crop-box').value === ''")) throw new Error("Whole-photo selection failed");
+  await evaluate("window.fetch = window.originalFetch; delete window.originalFetch; document.getElementById('image-input').dispatchEvent(new Event('change'))");
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (await evaluate("document.getElementById('detection-status').textContent.includes('unavailable')")) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  if (!await evaluate("document.getElementById('detection-status').textContent.includes('unavailable')")) throw new Error("Detection fallback UI failed");
+  await evaluate("document.getElementById('image-query').value='Samsung phone'; document.getElementById('image-search-form').requestSubmit()");
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (await evaluate("location.pathname === '/search' && document.readyState === 'complete'")) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  if (!await evaluate("document.body.textContent.includes('Image + text search')")) throw new Error("Image and text search UI failed");
   await navigate("/");
   await evaluate("document.getElementById('voice-open').click()");
   if (!await evaluate("document.getElementById('voice-dialog').open")) throw new Error("Voice dialog failed");

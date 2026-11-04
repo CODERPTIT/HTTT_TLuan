@@ -1,0 +1,105 @@
+{% extends 'base.html' %}{% block content %}
+<div class="auth-container">
+  <section class="auth-panel">
+    <span class="eyebrow">ABC ELECTRONICS</span>
+    <h1>Sign in</h1>
+    <p>Access your own cart, orders and personalized recommendations.</p>
+    {% if error %}<p role="alert" class="auth-error">{{ error }}</p>{% endif %}
+    <form action="/login" method="post" class="stack" id="login-form">
+      <input type="hidden" name="next" value="{{ next }}">
+      <div>
+        <label for="email">Email address</label>
+        <div class="input-with-icon">
+          <input id="email" name="email" type="email" autocomplete="username" placeholder="name@example.test" required>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <label for="password" style="margin: 0;">Password</label>
+          <button type="button" id="toggle-pwd" class="text-link" style="font-size: 11.5px; background: none; border: none; padding: 0;">Show</button>
+        </div>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••••••" required>
+      </div>
+      <button class="button" style="width: 100%; margin-top: 6px;">Sign in to your account</button>
+    </form>
+    <p style="margin-top: 18px; font-size: 13px; text-align: center;">New customer? <a href="/register" class="text-link">Create an account</a></p>
+  </section>
+
+  <aside class="demo-accounts-card">
+    <div class="demo-card-header">
+      <span class="badge" style="font-size: 11px;">⚡ Academic Prototype</span>
+      <h3>1-Click Demo Accounts</h3>
+      <p>Select any role below to fill credentials automatically for evaluation &amp; testing:</p>
+    </div>
+    <div class="demo-roles-list">
+      <button type="button" class="demo-role-btn" onclick="fillLogin('demo1@example.test', 'DemoCustomer123!')">
+        <div>
+          <b>Customer (Demo 1)</b>
+          <small>Personalized cart, orders, AI recommendations</small>
+        </div>
+        <span>Fill →</span>
+      </button>
+      <button type="button" class="demo-role-btn" onclick="fillLogin('admin@abc.test', 'DemoStaff123!')">
+        <div>
+          <b>Administrator</b>
+          <small>Manage catalogue, prices &amp; product status</small>
+        </div>
+        <span>Fill →</span>
+      </button>
+      <button type="button" class="demo-role-btn" onclick="fillLogin('sales@abc.test', 'DemoStaff123!')">
+        <div>
+          <b>Sales Staff</b>
+          <small>Process confirmed customer orders</small>
+        </div>
+        <span>Fill →</span>
+      </button>
+      <button type="button" class="demo-role-btn" onclick="fillLogin('warehouse@abc.test', 'DemoStaff123!')">
+        <div>
+          <b>Warehouse Staff</b>
+          <small>Update inventory stock &amp; mark orders shipped</small>
+        </div>
+        <span>Fill →</span>
+      </button>
+      <button type="button" class="demo-role-btn" onclick="fillLogin('shipping@abc.test', 'DemoShipping123!')">
+        <div>
+          <b>Shipping Provider</b>
+          <small>Update assigned shipments through delivery</small>
+        </div>
+        <span>Fill →</span>
+      </button>
+      <button type="button" class="demo-role-btn" onclick="fillLogin('manager@abc.test', 'DemoStaff123!')">
+        <div>
+          <b>Manager</b>
+          <small>View executive metrics, revenue &amp; sales reports</small>
+        </div>
+        <span>Fill →</span>
+      </button>
+    </div>
+  </aside>
+</div>
+
+<script>
+function fillLogin(email, password) {
+  const emailInput = document.getElementById('email');
+  const pwdInput = document.getElementById('password');
+  if (emailInput && pwdInput) {
+    emailInput.value = email;
+    pwdInput.value = password;
+    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+    pwdInput.dispatchEvent(new Event('input', { bubbles: true }));
+    if (window.notify) window.notify('Filled credentials for ' + email);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const toggleBtn = document.getElementById('toggle-pwd');
+  const pwdInput = document.getElementById('password');
+  if (toggleBtn && pwdInput) {
+    toggleBtn.addEventListener('click', () => {
+      const isPwd = pwdInput.type === 'password';
+      pwdInput.type = isPwd ? 'text' : 'password';
+      toggleBtn.textContent = isPwd ? 'Hide' : 'Show';
+    });
+  }
+});
+</script>
+{% endblock %}

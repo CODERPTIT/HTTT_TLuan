@@ -21,9 +21,9 @@ class OrderService:
         self.getOrder(orderId)
         return self.shipments.findByOrder(orderId)
 
-    def _getPayment(self, orderId: int) -> Payment:
+    def getPayment(self, orderId: int) -> Payment:
         return self.payments.findByOrder(orderId)
 
-    def _listOrders(self, customerId: int) -> list[Order]:
+    def listOrders(self, customerId: int) -> list[Order]:
         return self.orders.findByCustomer(customerId)
 

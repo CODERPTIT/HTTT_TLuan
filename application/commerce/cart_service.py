@@ -25,7 +25,7 @@ class CartService:
         self._validate(product, quantity + (existing.quantity if existing else 0))
         cart.addItem(product, quantity)
         self.carts.update(cart)
-        self.interactions._record(cart.customerId, product, InteractionType.ADD_TO_CART)
+        self.interactions.record(cart.customerId, product, InteractionType.ADD_TO_CART)
         return cart
 
     def updateQuantity(self, cartId: int, productId: int, quantity: int) -> Cart:

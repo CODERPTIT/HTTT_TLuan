@@ -20,7 +20,7 @@ def test_layer_dependencies():
                 if layer == "presentation":
                     assert imported.split(".")[0] not in {"data", "sqlalchemy"}, path
                 if layer == "application":
-                    assert not imported.startswith(("data.infrastructure", "presentation", "fastapi")), path
+                    assert imported.split(".")[0] not in {"data", "presentation", "fastapi", "sqlalchemy"}, path
                 if layer == "data":
                     assert not imported.startswith(("application", "presentation")), path
 
@@ -28,11 +28,13 @@ def test_layer_dependencies():
 def test_required_classes():
     expected = {
         "presentation": "SearchController RecommendationController CartController CheckoutController OrderController",
+        "application": "AccountService CustomerService StaffService",
+        "application/ports": "ProductRepositoryPort InteractionRepositoryPort CustomerRepositoryPort",
         "application/search": "SearchService QueryProcessor SpeechToTextService TextEmbeddingService ImageEmbeddingService RetrievalService RankingService",
         "application/recommendation": "RecommendationService ContentBasedRecommender CollaborativeRecommender HybridRankingService",
         "application/commerce": "CartService CheckoutService OrderService",
         "domain": "Customer SearchQuery TextQuery ImageQuery VoiceQuery SearchResult Product ProductSpecification Category ProductUnit Interaction Cart CartItem Order OrderItem Payment Shipment",
-        "data/repository": "ProductRepository InteractionRepository SearchRepository CartRepository OrderRepository PaymentRepository ShipmentRepository",
+        "data/repository": "ProductRepository CustomerRepository InteractionRepository SearchRepository CartRepository OrderRepository PaymentRepository ShipmentRepository",
         "data/infrastructure": "ProductDatabase OrderDatabase VectorIndex ImageStorage",
     }
     for package, names in expected.items():
