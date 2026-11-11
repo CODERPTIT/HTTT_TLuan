@@ -39,8 +39,20 @@ def register_catalog_routes(app, web):
 
     @app.get("/search")
     def search(request: Request, q: str = "", category: str = "", brand: str = "", color: str = "",
-               minimum: Decimal = Query(0, ge=0), maximum: Decimal | None = Query(None, ge=0),
+               minimum: str = Query("0"), maximum: str = Query(""),
                available: bool = False, sort: str = "relevance", image: str = "", transcript: str = ""):
+        try:
+            min_price = Decimal(minimum.strip()) if minimum.strip() else Decimal(0)
+            if min_price < 0:
+                raise ValueError
+        except Exception:
+            min_price = Decimal(0)
+        try:
+            max_price: Decimal | None = Decimal(maximum.strip()) if maximum.strip() else None
+            if max_price is not None and max_price < 0:
+                raise ValueError
+        except Exception:
+            max_price = None
         with web.scope(request) as services:
             web.optionalCustomerId(request, services)
             if image:
@@ -61,12 +73,12 @@ def register_catalog_routes(app, web):
                 results = services.search.text(q)
                 modality, summary, ranking_label = "Text", q, "OpenAI embeddings and reranking"
             catalog = services.search.catalog()
-            results = services.search.filterResults(results, category, brand, minimum, maximum, available, sort, color)
+            results = services.search.filterResults(results, category, brand, min_price, max_price, available, sort, color)
             colors = sorted({spec.specValue for product in catalog for spec in product.specifications
                              if spec.specName == "Color"})
             return web.render(request, "search_results.html", results=results, modality=modality, summary=summary,
                 ranking_label=ranking_label, q=q, image=image, transcript=transcript, category=category, brand=brand,
-                color=color, minimum=minimum, maximum=maximum, available=available, sort=sort,
+                color=color, minimum=min_price, maximum=max_price, available=available, sort=sort,
                 categories=sorted({product.category.categoryName for product in catalog}),
                 brands=sorted({product.brand for product in catalog}), colors=colors)
 
