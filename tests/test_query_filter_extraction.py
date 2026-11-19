@@ -31,7 +31,7 @@ def test_llm_extracts_structured_filters_and_regex_price_wins(services, monkeypa
         "minimumPrice": None,
         "maximumPrice": 20000000,
         "brands": ["Samsung"],
-        "categories": ["Smartphones"],
+        "categories": ["Electronic"],
         "colors": ["blue"],
         "availableOnly": True,
     })
@@ -40,7 +40,7 @@ def test_llm_extracts_structured_filters_and_regex_price_wins(services, monkeypa
     assert filters.semanticText == "long battery life"
     assert filters.maximumPrice == 10000000
     assert filters.brands == {"Samsung"}
-    assert filters.categories == {"Smartphones"}
+    assert filters.categories == {"Electronic"}
     assert filters.colors == {"blue"}
     assert filters.availableOnly is True
     assert calls[0]["response_format"]["type"] == "json_schema"

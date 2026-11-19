@@ -27,7 +27,7 @@ class RerankingService:
             response = OpenAI(api_key=api_key, timeout=30, max_retries=0).chat.completions.create(
                 model=self.model,
                 messages=[{"role": "system", "content": (
-                    "You rerank electronics products for a shopping search. Compare the user's intent with each "
+                    "You rerank retail products for a shopping search. Compare the user's intent with each "
                     "candidate's name, brand, category, price and description across languages. Respect explicit "
                     "price, brand, category, availability and attribute constraints. Return a JSON score from 0 to 100 "
                     "for every candidate: 0 for greetings, questions unrelated to shopping, or unrelated products; "

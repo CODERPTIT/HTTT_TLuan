@@ -16,7 +16,7 @@ class QueryFilterExtractionService:
         if not api_key:
             raise ValueError("Natural-language filter extraction needs OPENAI_API_KEY in .env")
 
-        brands = sorted({product.brand for product in products})
+        brands = sorted({getattr(product, "brand", "") for product in products} - {""})
         categories = sorted({product.category.categoryName for product in products})
         colors = sorted({spec.specValue for product in products for spec in product.specifications
                          if spec.specName == "Color"})
@@ -42,7 +42,7 @@ class QueryFilterExtractionService:
             response = OpenAI(api_key=api_key, timeout=30, max_retries=0).chat.completions.create(
                 model=self.model,
                 messages=[{"role": "system", "content": (
-                    "Extract explicit shopping filters from a multilingual electronics query. Return prices in VND. "
+                    "Extract explicit shopping filters from a multilingual retail query. Return prices in VND. "
                     "Use only values from the supplied allowed lists and use an empty array when absent. Do not turn "
                     "soft preferences such as lightweight, long battery, good camera or gaming into hard filters; "
                     "keep them in semanticQuery. Remove price, brand, category, color and availability constraints "

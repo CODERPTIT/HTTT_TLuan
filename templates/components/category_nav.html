@@ -1,6 +1,6 @@
 <nav class="category-nav container" aria-label="Product categories">
-  <a href="/search?q=electronics" class="all-category"><span aria-hidden="true">▦</span> Shop all</a>
-  {% for label,category in [('Laptops','Laptops'),('Smartphones','Smartphones'),('TV & Entertainment','Televisions'),('Audio','Audio'),('Cameras','Cameras'),('Gaming','Gaming'),('Smart Home','Smart Home'),('Accessories','Accessories')] %}
-  <a href="/search?q=electronics&amp;category={{ category|urlencode }}">{{ label }}</a>
+  <a href="/search?q=products" class="all-category"><span aria-hidden="true">â–¦</span> Shop all</a>
+  {% for category in ['Electronic', 'Book', 'Fashion', 'Furniture'] %}
+  <a href="/search?q=products&amp;category={{ category|urlencode }}">{{ category }}</a>
   {% endfor %}
 </nav>

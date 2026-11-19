@@ -26,12 +26,12 @@ def test_category_navigation_uses_catalog_filter_without_semantic_search(client,
 
     monkeypatch.setattr(SearchService, "search", unexpected_semantic_search)
     home = client.get("/")
-    assert "/search?q=electronics&amp;category=Laptops" in home.text
+    assert "/search?q=products&amp;category=Electronic" in home.text
 
-    response = client.get("/search", params={"q": "electronics", "category": "Laptops"})
+    response = client.get("/search", params={"q": "products", "category": "Electronic"})
     assert response.status_code == 200
     assert "ASUS ROG Strix G16" in response.text
-    assert "Samsung Galaxy S24" not in response.text
+    assert "Clean Code" not in response.text
 
 
 def test_complete_browser_flow(client):

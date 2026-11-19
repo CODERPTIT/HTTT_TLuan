@@ -65,10 +65,10 @@ def register_catalog_routes(app, web):
                 results = services.search.search(VoiceQuery(transcribedText=transcript))
                 modality, summary = "Voice", transcript
                 ranking_label = "OpenAI embeddings and reranking"
-            elif q.strip().lower() in {"", "electronics"}:
+            elif q.strip().lower() in {"", "products", "electronics"}:
                 results = [SearchResult(index, Decimal(0), product)
                            for index, product in enumerate(services.search.catalog(), 1)]
-                modality, summary, ranking_label = "Browse", "All electronics", "catalog order"
+                modality, summary, ranking_label = "Browse", "All products", "catalog order"
             else:
                 results = services.search.text(q)
                 modality, summary, ranking_label = "Text", q, "OpenAI embeddings and reranking"
@@ -80,7 +80,7 @@ def register_catalog_routes(app, web):
                 ranking_label=ranking_label, q=q, image=image, transcript=transcript, category=category, brand=brand,
                 color=color, minimum=min_price, maximum=max_price, available=available, sort=sort,
                 categories=sorted({product.category.categoryName for product in catalog}),
-                brands=sorted({product.brand for product in catalog}), colors=colors)
+                brands=sorted({getattr(product, "brand", "") for product in catalog} - {""}), colors=colors)
 
     @app.post("/search/detect")
     async def detect_objects(request: Request, image: UploadFile = File(...)):

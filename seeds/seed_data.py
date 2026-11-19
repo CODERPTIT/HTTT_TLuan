@@ -1,49 +1,84 @@
 from decimal import Decimal
 from pathlib import Path
-from shutil import copyfile
+
 from PIL import Image, ImageDraw
 from sqlalchemy import select
-from domain.product.product import Product, ProductStatus
-from domain.product.category import Category
-from domain.product.product_unit import ProductUnit
-from domain.product.product_specification import ProductSpecification
+
 from data.infrastructure.product_database import categories, products, specifications
-from data.repository.product_repository import ProductRepository
-from data.repository.interaction_repository import InteractionRepository
 from data.repository.customer_repository import CustomerRepository
+from data.repository.interaction_repository import InteractionRepository
+from data.repository.product_repository import ProductRepository
 from domain.interaction.interaction import InteractionType
+from domain.product.book import Book
+from domain.product.category import Category
+from domain.product.electronic import Electronic
+from domain.product.fashion import Fashion
+from domain.product.furniture import Furniture
+from domain.product.product import ProductStatus
+from domain.product.product_specification import ProductSpecification
+from domain.product.product_unit import ProductUnit
+
+
+CATEGORY_IDS = {"Electronic": 1, "Book": 2, "Fashion": 3, "Furniture": 4}
 
 CATALOG = [
-    ("Laptops", "ASUS", "ROG Strix G16", "Gaming laptop with powerful graphics", 32990000, "16 GB RAM · RTX 4060 · 165 Hz"),
-    ("Laptops", "Dell", "Inspiron 14", "Lightweight laptop for work and study", 18990000, "16 GB RAM · 512 GB SSD"),
-    ("Laptops", "Apple", "MacBook Air M3", "Portable laptop with all-day battery", 26990000, "16 GB RAM · 13 inch Retina"),
-    ("Smartphones", "Samsung", "Galaxy S24", "Flagship phone with vivid AMOLED display", 17990000, "256 GB · 50 MP camera"),
-    ("Smartphones", "Apple", "iPhone 15", "Everyday phone with sharp photography", 18990000, "128 GB · OLED"),
-    ("Smartphones", "Samsung", "Galaxy A55", "Balanced phone with long battery life", 9490000, "256 GB · 5000 mAh"),
-    ("Televisions", "Samsung", "Crystal UHD 55", "Immersive 4K TV for home entertainment", 12990000, "55 inch · 4K · HDR"),
-    ("Televisions", "LG", "OLED C3", "Cinematic 4K TV with deep contrast", 28990000, "55 inch · OLED · 120 Hz"),
-    ("Televisions", "Sony", "Bravia X80L", "Natural color 4K TV for family viewing", 18990000, "50 inch · 4K · Google TV"),
-    ("Audio", "Sony", "WH-1000XM5", "Wireless noise cancelling headphones", 7490000, "Bluetooth · 30 hour battery"),
-    ("Audio", "JBL", "Flip 6", "Portable wireless waterproof speaker", 2490000, "IP67 · 12 hour battery"),
-    ("Audio", "Apple", "AirPods Pro", "Wireless noise cancelling earbuds", 5490000, "USB-C · Spatial audio"),
-    ("Cameras", "Canon", "EOS R50", "Compact mirrorless camera for creators", 17990000, "24 MP · 4K video"),
-    ("Cameras", "Sony", "ZV-E10", "Interchangeable lens camera for video", 15990000, "24 MP · APS-C"),
-    ("Cameras", "Canon", "PowerShot V10", "Pocket camera for everyday stories", 8990000, "4K video · wide angle"),
-    ("Gaming", "Sony", "PlayStation 5", "Next generation gaming console", 12990000, "1 TB SSD · 4K gaming"),
-    ("Gaming", "ASUS", "ROG Ally", "Handheld gaming console on the go", 14990000, "512 GB · 120 Hz"),
-    ("Gaming", "Logitech", "G Pro Controller", "Responsive wireless gaming controller", 2490000, "Wireless · programmable buttons"),
-    ("Smart Home", "Samsung", "SmartThings Hub", "Connect your smart home devices", 1990000, "Wi-Fi · Matter"),
-    ("Smart Home", "LG", "PuriCare Mini", "Compact air purifier for your room", 3290000, "HEPA · quiet mode"),
-    ("Smart Home", "Sony", "Smart Speaker", "Voice enabled home audio speaker", 2990000, "Wi-Fi · Bluetooth"),
-    ("Accessories", "Logitech", "MX Master 3S", "Precision wireless mouse for productivity", 2290000, "8000 DPI · USB-C"),
-    ("Accessories", "Lenovo", "USB-C Dock", "Expand your laptop connectivity", 1790000, "HDMI · USB 3 · 100 W"),
-    ("Accessories", "Dell", "UltraSharp 27", "Crisp monitor for creative work", 7990000, "27 inch · QHD · IPS"),
+    ("Electronic", "ASUS ROG Strix G16", "Gaming laptop designed for powerful competitive gaming", 32990000,
+     "16 GB RAM Â· RTX 4060 Â· 165 Hz", {"brand": "ASUS", "model": "ROG Strix G16", "powerWattage": 280}),
+    ("Electronic", "Dell Inspiron 14", "Lightweight laptop for work and study", 18990000,
+     "16 GB RAM Â· 512 GB SSD", {"brand": "Dell", "model": "Inspiron 14", "powerWattage": 65}),
+    ("Electronic", "Apple MacBook Air M3", "Portable laptop with all-day battery", 26990000,
+     "16 GB RAM Â· 13 inch Retina", {"brand": "Apple", "model": "MacBook Air M3", "powerWattage": 35}),
+    ("Electronic", "Samsung Galaxy S24", "Flagship phone with vivid AMOLED display", 17990000,
+     "256 GB Â· 50 MP camera", {"brand": "Samsung", "model": "Galaxy S24", "powerWattage": 25}),
+    ("Electronic", "Apple iPhone 15", "Everyday phone with sharp photography", 18990000,
+     "128 GB Â· OLED", {"brand": "Apple", "model": "iPhone 15", "powerWattage": 20}),
+    ("Electronic", "Samsung Galaxy A55", "Balanced phone with long battery life", 9490000,
+     "256 GB Â· 5000 mAh", {"brand": "Samsung", "model": "Galaxy A55", "powerWattage": 25}),
+    ("Book", "Clean Code", "A handbook of agile software craftsmanship", 690000,
+     "Programming Â· Software quality", {"author": "Robert C. Martin", "isbn": "9780132350884",
+      "publisher": "Prentice Hall", "publicationYear": 2008, "numberOfPages": 464, "coverType": "Paperback"}),
+    ("Book", "Design Patterns", "Reusable object-oriented software patterns", 850000,
+     "Programming Â· Object-oriented design", {"author": "Erich Gamma", "isbn": "9780201633610",
+      "publisher": "Addison-Wesley", "publicationYear": 1994, "numberOfPages": 395, "coverType": "Hardcover"}),
+    ("Book", "Domain-Driven Design", "Tackling complexity in the heart of software", 920000,
+     "Architecture Â· Domain modeling", {"author": "Eric Evans", "isbn": "9780321125217",
+      "publisher": "Addison-Wesley", "publicationYear": 2003, "numberOfPages": 560, "coverType": "Hardcover"}),
+    ("Electronic", "Sony WH-1000XM5", "Wireless noise cancelling headphones", 7490000,
+     "Bluetooth Â· 30 hour battery", {"brand": "Sony", "model": "WH-1000XM5", "powerWattage": 5}),
+    ("Electronic", "JBL Flip 6", "Portable wireless waterproof speaker", 2490000,
+     "IP67 Â· 12 hour battery", {"brand": "JBL", "model": "Flip 6", "powerWattage": 20}),
+    ("Electronic", "Apple AirPods Pro", "Wireless noise cancelling earbuds", 5490000,
+     "USB-C Â· Spatial audio", {"brand": "Apple", "model": "AirPods Pro", "powerWattage": 5}),
+    ("Fashion", "Nike Dri-FIT T-Shirt", "Breathable everyday sports shirt", 790000,
+     "Regular fit Â· Moisture wicking", {"brand": "Nike", "size": "M", "color": "black", "material": "Polyester", "gender": "Unisex"}),
+    ("Fashion", "Levi's 501 Jeans", "Classic straight-fit denim jeans", 1890000,
+     "Straight fit Â· Button fly", {"brand": "Levi's", "size": "32", "color": "blue", "material": "Denim", "gender": "Unisex"}),
+    ("Fashion", "Adidas Ultraboost Shoes", "Responsive running shoes for daily training", 3290000,
+     "Boost midsole Â· Rubber outsole", {"brand": "Adidas", "size": "42", "color": "black", "material": "Textile", "gender": "Unisex"}),
+    ("Electronic", "Sony PlayStation 5", "Next generation gaming console", 12990000,
+     "1 TB SSD Â· 4K gaming", {"brand": "Sony", "model": "PlayStation 5", "powerWattage": 350}),
+    ("Electronic", "ASUS ROG Ally", "Handheld gaming console on the go", 14990000,
+     "512 GB Â· 120 Hz", {"brand": "ASUS", "model": "ROG Ally", "powerWattage": 65}),
+    ("Electronic", "Logitech G Pro Controller", "Responsive wireless gaming controller", 2490000,
+     "Wireless Â· Programmable buttons", {"brand": "Logitech", "model": "G Pro", "powerWattage": 5}),
+    ("Furniture", "IKEA LAGKAPTEN Desk", "Minimal desk for home and office", 2490000,
+     "120 Ã— 60 cm Â· Assembly required", {"brand": "IKEA", "material": "Fiberboard", "dimensions": "120x60x73 cm", "weightKg": 18, "assemblyRequired": True}),
+    ("Furniture", "Hoa Phat Ergonomic Chair", "Adjustable chair with breathable mesh back", 3590000,
+     "Adjustable height Â· Lumbar support", {"brand": "Hoa Phat", "material": "Mesh and steel", "dimensions": "65x65x115 cm", "weightKg": 15, "assemblyRequired": True}),
+    ("Furniture", "JYSK HORSENS Bookshelf", "Five-tier bookshelf for compact spaces", 2790000,
+     "Five shelves Â· Oak finish", {"brand": "JYSK", "material": "Engineered wood", "dimensions": "80x30x180 cm", "weightKg": 28, "assemblyRequired": True}),
+    ("Electronic", "Logitech MX Master 3S", "Precision wireless mouse for productivity", 2290000,
+     "8000 DPI Â· USB-C", {"brand": "Logitech", "model": "MX Master 3S", "powerWattage": 5}),
+    ("Electronic", "Lenovo USB-C Dock", "Expand your laptop connectivity", 1790000,
+     "HDMI Â· USB 3 Â· 100 W", {"brand": "Lenovo", "model": "USB-C Dock", "powerWattage": 100}),
+    ("Electronic", "Dell UltraSharp 27", "Crisp monitor for creative work", 7990000,
+     "27 inch Â· QHD Â· IPS", {"brand": "Dell", "model": "UltraSharp 27", "powerWattage": 65}),
 ]
 
 PRODUCT_COLORS = (
-    "gray", "silver", "silver", "black", "silver", "blue", "black", "black",
-    "black", "black", "blue", "white", "black", "black", "black", "white",
-    "white", "black", "white", "white", "black", "gray", "silver", "black",
+    "gray", "silver", "silver", "black", "silver", "blue", "white", "yellow",
+    "blue", "black", "blue", "white", "black", "blue", "black", "white",
+    "white", "black", "white", "gray", "brown", "gray", "silver", "black",
 )
 
 
@@ -66,71 +101,68 @@ def ensure_filter_specifications(connection) -> None:
 def draw_product(path: Path, category: str, variant: int) -> None:
     picture = Image.new("RGB", (640, 480), "#f1f4fa")
     draw = ImageDraw.Draw(picture)
-    accents = ["#255ca8", "#7856bd", "#0d8b8d"]
-    accent = accents[variant % 3]
+    accent = f"#{(variant * 73) % 256:02x}{(variant * 131) % 256:02x}{(variant * 197) % 256:02x}"
     draw.ellipse((120, 385, 530, 423), fill="#dce2ec")
-    if category in {"Laptops", "Televisions", "Accessories", "Gaming"}:
+    if category == "Electronic":
         draw.rounded_rectangle((122, 78, 518, 330), 18, fill="#202b40")
         draw.rounded_rectangle((137, 93, 503, 313), 9, fill=accent)
-        draw.polygon([(137, 313), (315, 135), (503, 260), (503, 313)], fill="#83c5ed")
-        if category == "Laptops":
-            draw.polygon([(122, 330), (518, 330), (574, 385), (66, 385)], fill="#9da9ba")
-            draw.rounded_rectangle((66, 380, 574, 395), 7, fill="#536175")
-        else:
-            draw.rectangle((302, 330, 338, 384), fill="#536175")
-            draw.rounded_rectangle((237, 381, 403, 394), 5, fill="#202b40")
-    elif category == "Smartphones":
-        draw.rounded_rectangle((218, 48, 422, 412), 30, fill="#202b40")
-        draw.rounded_rectangle((230, 61, 410, 398), 22, fill=accent)
-        draw.ellipse((240, 160, 440, 350), fill="#9ddbf1")
-        draw.rounded_rectangle((286, 66, 354, 80), 7, fill="#202b40")
-    elif category == "Audio":
-        draw.arc((170, 65, 470, 370), 180, 360, fill="#26344b", width=38)
-        draw.rounded_rectangle((154, 222, 232, 369), 28, fill=accent)
-        draw.rounded_rectangle((408, 222, 486, 369), 28, fill=accent)
-    elif category == "Cameras":
-        draw.rounded_rectangle((120, 154, 520, 355), 26, fill="#26344b")
-        draw.rounded_rectangle((180, 115, 300, 175), 12, fill="#344661")
-        draw.ellipse((235, 166, 424, 355), fill="#121d2c")
-        draw.ellipse((258, 189, 401, 332), fill=accent)
-        draw.ellipse((282, 212, 377, 307), fill="#8cc4df")
-        draw.rectangle((447, 176, 485, 194), fill="#eeeeee")
+        draw.polygon([(122, 330), (518, 330), (574, 385), (66, 385)], fill="#9da9ba")
+    elif category == "Book":
+        draw.rounded_rectangle((165, 65, 475, 390), 12, fill=accent)
+        draw.rectangle((185, 92, 455, 365), fill="#f8fafc")
+        draw.rectangle((210, 135, 430, 155), fill=accent)
+        draw.rectangle((210, 180, 390, 192), fill="#9da9ba")
+    elif category == "Fashion":
+        draw.polygon([(260, 80), (380, 80), (465, 145), (415, 220), (390, 195),
+                      (390, 390), (250, 390), (250, 195), (225, 220), (175, 145)], fill=accent)
     else:
-        draw.rounded_rectangle((212, 80, 428, 390), 42, fill="#d6deea")
-        draw.rounded_rectangle((225, 91, 415, 373), 35, fill="#ffffff")
-        draw.ellipse((268, 135, 372, 239), fill=accent)
-        for offset in range(6):
-            draw.line((258, 275 + offset * 12, 382, 275 + offset * 12), fill="#b5c4d6", width=3)
+        draw.rounded_rectangle((110, 170, 530, 215), 8, fill=accent)
+        draw.rectangle((135, 215, 165, 385), fill="#536175")
+        draw.rectangle((475, 215, 505, 385), fill="#536175")
     picture.save(path)
+
+
+def _product(identity: int, entry):
+    category_name, name, description, price, features, details = entry
+    common = dict(
+        productId=identity,
+        productName=name,
+        description=description,
+        price=Decimal(price),
+        status=ProductStatus.OUT_OF_STOCK if identity == 24 else ProductStatus.ACTIVE,
+        category=Category(CATEGORY_IDS[category_name], category_name),
+        quantityAvailable=0 if identity == 24 else 12,
+        units=[ProductUnit(f"ABC-{identity:03}-001")],
+        specifications=[
+            ProductSpecification(0, "Key features", features),
+            ProductSpecification(0, "Color", PRODUCT_COLORS[identity - 1]),
+        ],
+    )
+    if category_name == "Electronic":
+        common["specifications"].append(ProductSpecification(0, "Warranty", "12 months"))
+        return Electronic(**common, warrantyMonths=12, **details)
+    if category_name == "Book":
+        return Book(**common, **details)
+    if category_name == "Fashion":
+        return Fashion(**common, **details)
+    return Furniture(**common, **details)
 
 
 def seed(connection, image_root: Path) -> None:
     image_root.mkdir(parents=True, exist_ok=True)
-    asset_root = Path(__file__).resolve().parents[1] / "static" / "images" / "products"
     for identity, entry in enumerate(CATALOG, 1):
         path = image_root / f"product-{identity}.png"
-        asset = asset_root / f"product-{identity}.png"
         if not path.exists():
-            if asset.exists():
-                copyfile(asset, path)
-            else:
-                draw_product(path, entry[0], identity)
+            draw_product(path, entry[0], identity)
     if connection.execute(select(products.c.id).limit(1)).first():
         ensure_filter_specifications(connection)
         return
-    names = list(dict.fromkeys(entry[0] for entry in CATALOG))
-    for identity, name in enumerate(names, 1):
+    for name, identity in CATEGORY_IDS.items():
         connection.execute(categories.insert().values(id=identity, name=name))
     repository = ProductRepository(connection)
-    for identity, (category, brand, model, description, price, specification) in enumerate(CATALOG, 1):
-        repository.save(Product(identity, f"{brand} {model}", brand, model, description,
-            Decimal(price), ProductStatus.OUT_OF_STOCK if identity == 24 else ProductStatus.ACTIVE,
-            Category(names.index(category) + 1, category),
-            0 if identity == 24 else 12, [ProductUnit(f"ABC-{identity:03}-001")],
-            [ProductSpecification(0, "Key features", specification), ProductSpecification(0, "Warranty", "12 months"),
-             ProductSpecification(0, "Color", PRODUCT_COLORS[identity - 1])]))
+    for identity, entry in enumerate(CATALOG, 1):
+        repository.save(_product(identity, entry))
     interactions = InteractionRepository(connection, repository, CustomerRepository(connection))
-    for customerId, productId, kind in [(1, 1, "VIEW"), (2, 1, "VIEW"), (2, 2, "PURCHASE"),
-                                       (2, 10, "ADD_TO_CART"), (3, 1, "CLICK"), (3, 3, "PURCHASE")]:
-        interactions.record(customerId, repository.findById(productId), InteractionType(kind))
-
+    for customer_id, product_id, kind in [(1, 1, "VIEW"), (2, 1, "VIEW"), (2, 2, "PURCHASE"),
+                                          (2, 10, "ADD_TO_CART"), (3, 1, "CLICK"), (3, 3, "PURCHASE")]:
+        interactions.record(customer_id, repository.findById(product_id), InteractionType(kind))

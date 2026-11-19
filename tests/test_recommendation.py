@@ -15,7 +15,7 @@ def test_eligible_and_deterministic(services):
 def test_cold_start(services):
     results = services.recommendation.getRecommendations(999, 1)
     assert results
-    assert results[0].category.categoryName == "Laptops"
+    assert results[0].category.categoryName == "Electronic"
 
 
 def test_collaborative_signal(services):

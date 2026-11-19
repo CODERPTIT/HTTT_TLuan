@@ -106,8 +106,8 @@ def test_image_text_shortlist_is_limited_to_twenty(services):
 
     ranking.reranker.rerank = rerank
     results = services.search.search(ImageQuery(imageReference="product-4.png", queryText="electronics"))
-    assert len(observed[0]) == 20
-    assert len(results) == 20
+    assert len(observed[0]) == 15
+    assert len(results) == 15
     assert all(result.relevanceScore == Decimal("0.5") for result in results)
 
 

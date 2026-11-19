@@ -61,7 +61,7 @@ class SearchService:
                       sort="relevance", color=""):
         filtered = [result for result in results
                     if (not category or result.product.category.categoryName == category)
-                    and (not brand or result.product.brand == brand)
+                    and (not brand or getattr(result.product, "brand", "") == brand)
                     and (not color or any(spec.specName == "Color" and spec.specValue == color
                                           for spec in result.product.specifications))
                     and result.product.price >= minimum
