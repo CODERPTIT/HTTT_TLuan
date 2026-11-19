@@ -35,14 +35,13 @@ class QueryFilters:
         "gold": "gold", "vang": "gold",
     }
     CATEGORY_ALIASES = {
-        "Laptops": ("may tinh xach tay", "laptops", "laptop"),
-        "Smartphones": ("dien thoai thong minh", "dien thoai", "smartphones", "smartphone", "phones", "phone"),
-        "Televisions": ("televisions", "television", "tivi", "tv"),
-        "Audio": ("thiet bi am thanh", "tai nghe", "loa", "audio", "headphones", "headphone", "earbuds", "speaker"),
-        "Cameras": ("may anh", "cameras", "camera"),
-        "Gaming": ("may choi game", "gaming console", "game console", "console"),
-        "Smart Home": ("nha thong minh", "smart home"),
-        "Accessories": ("phu kien", "accessories", "accessory"),
+        "Electronic": ("dien tu", "electronic", "electronics", "may tinh xach tay", "laptops", "laptop",
+                       "dien thoai thong minh", "dien thoai", "smartphones", "smartphone", "phones", "phone",
+                       "tivi", "tv", "tai nghe", "loa", "audio", "headphones", "camera", "gaming console",
+                       "phu kien", "accessories"),
+        "Book": ("sach", "books", "book"),
+        "Fashion": ("thoi trang", "quan ao", "fashion", "clothing", "clothes"),
+        "Furniture": ("noi that", "ban ghe", "furniture"),
     }
 
     @classmethod
@@ -72,7 +71,8 @@ class QueryFilters:
                 parsed.minimumPrice = cls._money(match.group(1))
                 working = cls._remove(working, match.span())
 
-        for brand in sorted({product.brand for product in products}, key=len, reverse=True):
+        brands = {getattr(product, "brand", "") for product in products} - {""}
+        for brand in sorted(brands, key=len, reverse=True):
             pattern = re.compile(rf"(?<!\w){re.escape(_normalize(brand))}(?!\w)")
             if pattern.search(working):
                 parsed.brands.add(brand)
@@ -129,7 +129,7 @@ class QueryFilters:
             return False
         if self.maximumPrice is not None and product.price > self.maximumPrice:
             return False
-        if self.brands and product.brand not in self.brands:
+        if self.brands and getattr(product, "brand", "") not in self.brands:
             return False
         if self.categories and product.category.categoryName not in self.categories:
             return False

@@ -23,7 +23,7 @@ def test_text_ranking_and_specification(services):
 def test_smartphone_aliases_find_products(services, query):
     results = services.search.text(query)
     assert results
-    assert all(result.product.category.categoryName == "Smartphones" for result in results)
+    assert all(result.product.category.categoryName == "Electronic" for result in results)
 
 
 @pytest.mark.parametrize("query,product_ids", [
@@ -169,7 +169,7 @@ def test_combined_brand_category_color_and_price_filters(services):
     assert [result.product.productId for result in results] == [6]
     product = results[0].product
     assert product.brand == "Samsung"
-    assert product.category.categoryName == "Smartphones"
+    assert product.category.categoryName == "Electronic"
     assert product.price <= 10000000
     assert any(spec.specName == "Color" and spec.specValue == "blue" for spec in product.specifications)
 
@@ -185,7 +185,7 @@ def test_filter_with_no_matching_products_skips_reranker(services):
     reranker = services.search.service.ranking.reranker
     reranker.rerank = lambda query, candidates: (_ for _ in ()).throw(
         AssertionError("Reranker should not run without filter matches"))
-    assert services.search.text("đồ dưới 1 triệu") == []
+    assert services.search.text("products under 100k") == []
 
 
 def test_availability_filter_excludes_out_of_stock_product(services):

@@ -8,6 +8,7 @@ class ContentBasedRecommender:
         right = set(re.findall(r"\w+", candidate.searchableText().lower()))
         text = Decimal(len(left & right)) / max(len(left | right), 1)
         price = Decimal(1) - abs(source.price - candidate.price) / max(source.price, candidate.price, 1)
+        same_brand = bool(getattr(source, "brand", "")) and getattr(source, "brand", "") == getattr(candidate, "brand", "")
         return (Decimal("0.4") * (source.category.categoryId == candidate.category.categoryId)
-                + Decimal("0.2") * (source.brand == candidate.brand) + Decimal("0.2") * text + Decimal("0.2") * price)
+                + Decimal("0.2") * same_brand + Decimal("0.2") * text + Decimal("0.2") * price)
 

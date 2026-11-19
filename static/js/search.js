@@ -57,7 +57,7 @@ async function detectObjects(file) {
       return;
     }
     if (!result.objects.length) {
-      detectionStatus.textContent = "No electronics detected. Search will use the whole photo.";
+      detectionStatus.textContent = "No supported product detected. Search will use the whole photo.";
       return;
     }
     for (const object of result.objects) {

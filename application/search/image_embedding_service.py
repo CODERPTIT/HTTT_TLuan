@@ -52,7 +52,7 @@ class ImageEmbeddingService:
             bins = [sum(histogram[channel * 256 + start:channel * 256 + start + 32]) / 256
                     for channel in range(3) for start in range(0, 256, 32)]
             gray = picture.convert("L")
-            pixels = list(gray.get_flattened_data())
+            pixels = list(gray.getdata())
             texture = [abs(pixels[position] - pixels[position - 1]) / 255 for position in range(1, 256, 16)]
             return bins + texture
 

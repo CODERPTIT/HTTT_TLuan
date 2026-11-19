@@ -16,8 +16,6 @@ class ProductStatus(StrEnum):
 class Product:
     productId: int
     productName: str
-    brand: str
-    model: str
     description: str
     price: Decimal
     status: ProductStatus
@@ -41,7 +39,10 @@ class Product:
         self.quantityAvailable += quantity
 
     def searchableText(self) -> str:
-        return " ".join([self.productName, self.brand, self.model, self.description,
-                         self.category.categoryName] +
+        return " ".join([self.productName, self.description, self.category.categoryName] +
+                        self.searchableAttributes() +
                         [spec.specName + " " + spec.specValue for spec in self.specifications])
+
+    def searchableAttributes(self) -> list[str]:
+        return []
 

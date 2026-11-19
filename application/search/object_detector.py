@@ -17,6 +17,14 @@ class ObjectDetector:
         ("a game controller", "Game controller"),
         ("a computer mouse", "Mouse"),
         ("a speaker", "Speaker"),
+        ("a book", "Book"),
+        ("a shirt", "Shirt"),
+        ("a chair", "Chair"),
+        ("a table", "Table"),
+        ("a book", "Book"),
+        ("a shirt", "Shirt"),
+        ("a chair", "Chair"),
+        ("a table", "Table"),
     ]
     _processor = None
     _model = None

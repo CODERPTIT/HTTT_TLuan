@@ -15,7 +15,7 @@
     <article class="cart-row">
       <a href="/products/{{ item.product.productId }}"><img src="/media/product-{{ item.product.productId }}.png" alt="{{ item.product.productName }}" loading="lazy"></a>
       <div class="cart-row-info">
-        <span class="product-brand">{{ item.product.brand }}</span>
+        <span class="product-brand">{{ item.product.brand if item.product.brand is defined else item.product.category.categoryName }}</span>
         <h3><a href="/products/{{ item.product.productId }}">{{ item.product.productName }}</a></h3>
         <p class="cart-unit-price">{{ item.product.price|money }} each</p>
         <div class="cart-controls">
@@ -56,8 +56,8 @@
 <div class="empty-state">
   <div class="empty-state-icon" style="font-size: 42px; margin-bottom: 8px;">🛍</div>
   <h2>Your cart is empty</h2>
-  <p>Explore our catalogue of 24 flagship electronics and add something you like.</p>
-  <a class="button" href="/search?q=electronics">Explore products</a>
+  <p>Explore our catalogue of electronics, books, fashion and furniture and add something you like.</p>
+  <a class="button" href="/search?q=products">Explore products</a>
 </div>
 {% endif %}
 {% include 'components/recommendation_section.html' %}
